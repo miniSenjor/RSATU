@@ -1,4 +1,4 @@
-ï»¿#include <iostream>
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <windows.h>
@@ -15,21 +15,20 @@ bool ReadInt(int& value) {
     return ss.eof();
 }
 
-void InputLimit(int& a, int& b) {
-    a = b = 0;
-    while (a >= b) {
-        cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ Ð´Ð¸Ð°Ð¿Ð°Ð·Ð¾Ð½Ð° Ñ†ÐµÐ»Ñ‹Ñ… Ð´ÐµÑÑÑ‚Ð¸Ñ‡Ð½Ñ‹Ñ… Ñ‡Ð¸ÑÐµÐ» (Ð < Ð’): " << endl;
+void InputAB(int& a, int& b) {
+    bool isANum = false, isBNum = false;
+    while (a >= b || !isANum || !isBNum) {
+        a = b = 0;
+        cout << "‚¢¥¤¨â¥ £à ­¨æë ¤¨ ¯ §®­  æ¥«ëå ¤¥áïâ¨ç­ëå ç¨á¥« (€ < ‚): " << endl;
         cout << "A = ";
-        while (!ReadInt(a))
-            cout << "ÐžÑˆÐ¸Ð±ÐºÐ° Ð²Ð²Ð¾Ð´Ð°. ÐŸÐ¾Ð²Ñ‚Ð¾Ñ€Ð¸Ñ‚Ðµ A = ";
-        
+        isANum = ReadInt(a);
+
         cout << "B = ";
-        while (!ReadInt(b))
-            cout << "ÐžÑˆÐ¸Ð±ÐºÐ° Ð²Ð²Ð¾Ð´Ð°. ÐŸÐ¾Ð²Ñ‚Ð¾Ñ€Ð¸Ñ‚Ðµ B = ";
-        
-        if (a >= b)
-            cout << "ÐžÑˆÐ¸Ð±ÐºÐ° Ð²Ð²Ð¾Ð´Ð° Ð³Ñ€Ð°Ð½Ð¸Ñ† Ð´Ð¸Ð°Ð¿Ð°Ð·Ð¾Ð½Ð°" << endl;
-        
+        isBNum = ReadInt(b);
+
+        if (!isANum || !isBNum || a>=b)
+            cout << "Žè¨¡ª  ¢¢®¤  £à ­¨æ ¤¨ ¯ §®­ " << endl;
+
     }
 }
 
@@ -38,7 +37,7 @@ void InputC(int a, int b, int& c, bool& isNegZero) {
     isNegZero = false;
     bool ok = false;
     while (!ok) {
-        cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ñ†ÐµÐ»Ð¾Ðµ Ð´ÐµÑÑÑ‚Ð¸Ñ‡Ð½Ð¾Ðµ Ñ‡Ð¸ÑÐ»Ð¾ Ð¡, Ð¿Ñ€Ð¸Ð½Ð°Ð´Ð»ÐµÐ¶Ð°Ñ‰ÐµÐµ Ð·Ð°Ð´Ð°Ð½Ð½Ð¾Ð¼Ñƒ Ð´Ð¸Ð°Ð¿Ð°Ð·Ð¾Ð½Ñƒ:" << endl;
+        cout << "‚¢¥¤¨â¥ æ¥«®¥ ¤¥áïâ¨ç­®¥ ç¨á«® ‘, ¯à¨­ ¤«¥¦ é¥¥ § ¤ ­­®¬ã ¤¨ ¯ §®­ã:" << endl;
         cout << "C = ";
 
         string s;
@@ -46,9 +45,9 @@ void InputC(int a, int b, int& c, bool& isNegZero) {
         if (s == "-0") {
             isNegZero = true;
             c = 0;
-            ok = (c > a && c < b);
+            ok = (c >= a && c <= b);
             if (!ok) {
-                cout << "ÐžÑˆÐ¸Ð±ÐºÐ° Ð²Ð²Ð¾Ð´Ð° Ñ‡Ð¸ÑÐ»Ð° Ð¡" << endl;
+                cout << "Žè¨¡ª  ¢¢®¤  ç¨á«  ‘" << endl;
                 isNegZero = false;
             }
         }
@@ -57,11 +56,11 @@ void InputC(int a, int b, int& c, bool& isNegZero) {
             if (ss >> c) {
                 ss >> ws;
                 if (ss.eof()) {
-                    ok = (c > a) && (c < b);
+                    ok = (c >= a) && (c <= b);
                 }
             }
             if (!ok) {
-                cout << "ÐžÑˆÐ¸Ð±ÐºÐ° Ð²Ð²Ð¾Ð´Ð° Ñ‡Ð¸ÑÐ»Ð° Ð¡" << endl;
+                cout << "Žè¨¡ª  ¢¢®¤  ç¨á«  ‘" << endl;
             }
         }
     }
@@ -71,30 +70,31 @@ void SelectMachineCode(int& k) {
     k = 0;
     bool ok = false;
     while (!ok) {
-        cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð½Ð¾Ð¼ÐµÑ€ Ð¼Ð°ÑˆÐ¸Ð½Ð½Ð¾Ð³Ð¾ ÐºÐ¾Ð´Ð°, Ð² ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ð¹ Ð½ÐµÐ¾Ð±Ñ…Ð¾Ð´Ð¸Ð¼Ð¾ Ð¿Ñ€ÐµÐ¾Ð±Ñ€Ð°Ð·Ð¾Ð²Ð°Ñ‚ÑŒ Ð²Ð²ÐµÐ´ÐµÐ½Ð½Ð¾Ðµ Ñ‡Ð¸ÑÐ»Ð¾ Ð¡:" << endl;
-        cout << "1 Ð¿Ñ€ÑÐ¼Ð¾Ð¹ ÐºÐ¾Ð´" << endl;
-        cout << "2 Ð¾Ð±Ñ€Ð°Ñ‚Ð½Ñ‹Ð¹ ÐºÐ¾Ð´" << endl;
-        cout << "3 Ð´Ð¾Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÐºÐ¾Ð´" << endl;
-        cout << "4 Ð¼Ð¾Ð´Ð¸Ñ„Ð¸Ñ†Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ Ð´Ð¾Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÐºÐ¾Ð´" << endl;
+        cout << "‚¢¥¤¨â¥ ­®¬¥à ¬ è¨­­®£® ª®¤ , ¢ ª®â®àë© ­¥®¡å®¤¨¬® ¯à¥®¡à §®¢ âì ¢¢¥¤¥­­®¥ ç¨á«® ‘:" << endl;
+        cout << "1 ¯àï¬®© ª®¤" << endl;
+        cout << "2 ®¡à â­ë© ª®¤" << endl;
+        cout << "3 ¤®¯®«­¨â¥«ì­ë© ª®¤" << endl;
+        cout << "4 ¬®¤¨ä¨æ¨à®¢ ­­ë© ¤®¯®«­¨â¥«ì­ë© ª®¤" << endl;
         cout << "K = ";
         if (ReadInt(k)) {
             ok = (k > 0) && (k < 5);
         }
         if (!ok) {
-            cout << "ÐžÑˆÐ¸Ð±ÐºÐ° Ð²Ð²Ð¾Ð´Ð° Ð½Ð¾Ð¼ÐµÑ€Ð° ÐºÐ¾Ð´Ð°" << endl;
+            cout << "Žè¨¡ª  ¢¢®¤  ­®¬¥à  ª®¤ " << endl;
         }
     }
 }
 
-bool YesNo(const string& q, const string& er) {
+bool YesNo(const string& q, const string& yn, const string& er) {
     while (true) {
         cout << q << endl;
+        cout << yn;
         string s;
         getline(cin, s);
-        for (char& c : s) c = tolower(c);
-        if (s == "y" || s == "Ð´Ð°")
+        //for (char& c : s) c = tolower(c);
+        if (s == "Y" || s == "¤ ")
             return true;
-        if (s == "n" || s == "Ð½ÐµÑ‚")
+        if (s == "N" || s == "­¥â")
             return false;
         cout << er << endl;
     }
@@ -156,14 +156,14 @@ string ToModCode(int v) {
 }
 
 int main() {
-    setlocale(LC_ALL, "ru");
-    SetConsoleCP(1251);
+    SetConsoleCP(866);
+    SetConsoleOutputCP(866);
     bool isInputCodeNumber = true, isInputC = true, isInputLimit = true, isInputExit = false;
     while (!isInputExit) {
         isInputLimit = true;
         while (isInputLimit) {
             int a, b, c, k;
-            InputLimit(a, b);
+            InputAB(a, b);
             isInputC = true;
             while (isInputC) {
                 bool isNegZero = false;
@@ -175,45 +175,49 @@ int main() {
                     bool special = false;
                     switch (k) {
                     case 1:
-                        cout << "ÐŸÑ€ÑÐ¼Ð¾Ð¹ ÐºÐ¾Ð´ ";
+                        cout << "àï¬®© ª®¤" << endl;
                         if (isNegZero)
                             code = "1.0";
                         else
                             code = ToDirectCode(c);
                         break;
                     case 2:
-                        cout << "ÐžÐ±Ñ€Ð°Ñ‚Ð½Ñ‹Ð¹ ÐºÐ¾Ð´ ";
+                        cout << "Ž¡à â­ë© ª®¤" << endl;
                         if (isNegZero)
                             code = "1.1";
                         else
                             code = ToRevCode(c);
                         break;
                     case 3:
-                        cout << "Ð”Ð¾Ð¿Ð¾Ð»Ð½Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ ÐºÐ¾Ð´ ";
+                        cout << "„®¯®«­¨â¥«ì­ë© ª®¤" << endl;
                         if (isNegZero)
+                        {
                             special = true;
+                            cout << "¤«ï -0 ­¥ áãé¥áâ¢ã¥â" << endl;
+                        }
                         else
                             code = ToDopCode(c);
                         break;
                     default:
-                        cout << "ÐœÐ¾Ð´Ð¸Ñ„Ð¸Ñ†Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ ÐºÐ¾Ð´ ";
+                        cout << "Œ®¤¨ä¨æ¨à®¢ ­­ë© ¤®¯®«­¨â¥«ì­ë© ª®¤" << endl;
                         if (isNegZero)
+                        {
                             special = true;
+                            cout << "¤«ï -0 ­¥ áãé¥áâ¢ã¥â" << endl;
+                        }
                         else
                             code = ToModCode(c);
                         break;
                     }
-                    if (special)
-                        cout << "Ð½ÐµÐ»ÑŒÐ·Ñ Ð¿Ñ€ÐµÐ¾Ð±Ñ€Ð°Ð·Ð¾Ð²Ð°Ñ‚ÑŒ" << endl;
-                    else
+                    if (!special)
                         cout << "C=" << code << endl;
-                    isInputCodeNumber = YesNo("Ð’Ñ‹Ð±Ñ€Ð°Ñ‚ÑŒ Ð½Ð¾Ð²Ñ‹Ð¹ Ð½Ð¾Ð¼ÐµÑ€ Ð¼Ð°ÑˆÐ¸Ð½Ð½Ð¾Ð³Ð¾ ÐºÐ¾Ð´Ð°? Y/N | Ð´Ð°/Ð½ÐµÑ‚", "ÐžÑˆÐ¸Ð±ÐºÐ° Ð·Ð°Ð¿Ñ€Ð¾ÑÐ° Ð½Ð° Ð²Ð²Ð¾Ð´ Ð½Ð¾Ð²Ð¾Ð³Ð¾ Ð½Ð¾Ð¼ÐµÑ€Ð° Ð¼Ð°ÑˆÐ¸Ð½Ð½Ð¾Ð³Ð¾ ÐºÐ¾Ð´Ð°");
+                    isInputCodeNumber = YesNo("‚ë¡à âì ­®¢ë© ­®¬¥à ¬ è¨­­®£® ª®¤ ?", "Y/N | ¤ /­¥â ", "Žè¨¡ª  § ¯à®á  ­  ¢¢®¤ ­®¢®£® ­®¬¥à  ¬ è¨­­®£® ª®¤ ");
                 }
-                isInputC = YesNo("Ð’Ð²ÐµÑÑ‚Ð¸ Ð½Ð¾Ð²Ð¾Ðµ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ðµ Ñ‡Ð¸ÑÐ»Ð° Ð¡? Y/N | Ð´Ð°/Ð½ÐµÑ‚", "ÐžÑˆÐ¸Ð±ÐºÐ° Ð·Ð°Ð¿Ñ€Ð¾ÑÐ° Ð½Ð° Ð²Ð²Ð¾Ð´ Ð½Ð¾Ð²Ð¾Ð³Ð¾ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ Ñ‡Ð¸ÑÐ»Ð° Ð¡");
+                isInputC = YesNo("‚¢¥áâ¨ ­®¢®¥ §­ ç¥­¨¥ ç¨á«  ‘?", "Y/N | ¤ /­¥â ", "Žè¨¡ª  § ¯à®á  ­  ¢¢®¤ ­®¢®£® §­ ç¥­¨ï ç¨á«  ‘");
             }
-            isInputLimit = YesNo("Ð’Ð²ÐµÑÑ‚Ð¸ Ð½Ð¾Ð²Ñ‹Ðµ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ñ‹ Ð´Ð¸Ð°Ð¿Ð°Ð·Ð¾Ð½Ð°? Y/N | Ð´Ð°/Ð½ÐµÑ‚", "ÐžÑˆÐ¸Ð±ÐºÐ° Ð·Ð°Ð¿Ñ€Ð¾ÑÐ° Ð½Ð° Ð²Ð²Ð¾Ð´ Ð½Ð¾Ð²Ñ‹Ñ… Ð³Ñ€Ð°Ð½Ð¸Ñ† Ð´Ð¸Ð°Ð¿Ð°Ð·Ð¾Ð½Ð°");
+            isInputLimit = YesNo("‚¢¥áâ¨ ­®¢ë¥ £à ­¨æë ¤¨ ¯ §®­ ?", "Y/N | ¤ /­¥â ", "Žè¨¡ª  § ¯à®á  ­  ¢¢®¤ ­®¢ëå £à ­¨æ ¤¨ ¯ §®­ ");
         }
-        isInputExit = YesNo("Ð—Ð°Ð²ÐµÑ€ÑˆÐ¸Ñ‚ÑŒ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñƒ? Y/N | Ð´Ð°/Ð½ÐµÑ‚", "ÐžÑˆÐ¸Ð±ÐºÐ° Ð·Ð°Ð¿Ñ€Ð¾ÑÐ° Ð½Ð° Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð¸Ðµ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ñ‹");
+        isInputExit = YesNo("‡ ¢¥àè¨âì ¯à®£à ¬¬ã?", "Y/N | ¤ /­¥â ", "Žè¨¡ª  § ¯à®á  ­  § ¢¥àè¥­¨¥ ¯à®£à ¬¬ë");
     }
     return 0;
 }
