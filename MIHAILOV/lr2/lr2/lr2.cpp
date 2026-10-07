@@ -2,9 +2,13 @@
 #include <string>
 #include <sstream>
 #include <windows.h>
+#include <iomanip>
+#include <algorithm>
+#include <cstdlib>
 
 using namespace std;
 
+// ╫Єхэшх Ўхыюую ўшёыр шч ёЄЁюъш
 bool ReadInt(int& value) {
     string s;
     if (!getline(cin, s)) return false;
@@ -15,92 +19,109 @@ bool ReadInt(int& value) {
     return ss.eof();
 }
 
+// ┬тюф A ш B
 void InputAB(int& a, int& b) {
     bool isANum = false, isBNum = false;
     while (!isANum || !isBNum) {
         a = b = 0;
-        cout << "Введите два целых десятичных чисела: " << endl;
+        cout << "┬тхфшЄх фтр Ўхы√ї фхё Єшўэ√ї ўшёыр:" << endl;
         cout << "A = ";
         isANum = ReadInt(a);
-
         cout << "B = ";
         isBNum = ReadInt(b);
-
         if (!isANum || !isBNum)
-            cout << "Ошибка ввода исходных чисел" << endl;
-
+            cout << "╬°шсър ттюфр шёїюфэ√ї ўшёхы" << endl;
     }
 }
 
-void InputC(int a, int b, int& c, bool& isNegZero) {
-    c = 0;
-    isNegZero = false;
-    bool ok = false;
-    while (!ok) {
-        cout << "Введите целое десятичное число С, принадлежащее заданному диапазону:" << endl;
-        cout << "C = ";
-
-        string s;
-        getline(cin, s);
-        if (s == "-0") {
-            isNegZero = true;
-            c = 0;
-            ok = (c >= a && c <= b);
-            if (!ok) {
-                cout << "Ошибка ввода числа С" << endl;
-                isNegZero = false;
-            }
-        }
-        else {
-            stringstream ss(s);
-            if (ss >> c) {
-                ss >> ws;
-                if (ss.eof()) {
-                    ok = (c >= a) && (c <= b);
-                }
-            }
-            if (!ok) {
-                cout << "Ошибка ввода числа С" << endl;
-            }
-        }
-    }
-}
-
+// ┬√сюЁ эюьхЁр юяхЁрЎшш
 void SelectMachineCode(int& k) {
     k = 0;
     bool ok = false;
     while (!ok) {
-        cout << "Введите номер операции, которую необходимо выполнить:" << endl;
-        cout << "1 A-B" << endl;
-        cout << "2-A-B" << endl;
-        cout << "3 A+B" << endl;//мой вариант
-        cout << "4-A+B" << endl;
+        cout << "┬тхфшЄх эюьхЁ юяхЁрЎшш, ъюЄюЁє■ эхюсїюфшью т√яюыэшЄ№:" << endl;
+        cout << "1  A - B" << endl;
+        cout << "2 -A - B" << endl;
+        cout << "3  A + B" << endl;
+        cout << "4 -A + B" << endl;
         cout << "K = ";
-        //может быть не заданная операция
         if (ReadInt(k)) {
-            ok = (k > 0) && (k < 5);
+            ok = (k >= 1 && k <= 4);
         }
         if (!ok) {
-            cout << "Ошибка ввода номера операции" << endl;
+            cout << "╬°шсър ттюфр эюьхЁр юяхЁрЎшш" << endl;
         }
     }
 }
 
+// ╟ряЁюё ─р/═хЄ
 bool YesNo(const string& q, const string& yn, const string& er) {
     while (true) {
         cout << q << endl;
         cout << yn;
         string s;
         getline(cin, s);
-        //for (char& c : s) c = tolower(c);
-        if (s == "Y" || s == "да")
+        if (s == "Y" || s == "фр")
             return true;
-        if (s == "N" || s == "нет")
+        if (s == "N" || s == "эхЄ")
             return false;
         cout << er << endl;
     }
 }
 
+// ╩юышўхёЄтю сшЄ фы  яЁхфёЄртыхэш  ьюфєы  ўшёыр
+int bits(int x) {
+    x = abs(x);
+    if (x == 0) return 1;
+    int count = 0;
+    while (x > 0) {
+        count++;
+        x >>= 1;
+    }
+    return count;
+}
+
+// ─тюшўэюх яЁхфёЄртыхэшх ўшёыр v т яюых width сшЄ
+string ToBinary(int v, int width) {
+    string s(width, '0');
+    for (int i = 0; i < width; ++i) {
+        if ((v >> (width - 1 - i)) & 1)
+            s[i] = '1';
+    }
+    return s;
+}
+
+// ╧Ё ьющ ъюф ё чрфрээющ °шЁшэющ
+string ToDirectCodeW(int v, int width) {
+    string mag = ToBinary(abs(v), width);
+    return (v < 0 ? "1." : "0.") + mag;
+}
+
+// ╬сЁрЄэ√щ ъюф ё чрфрээющ °шЁшэющ
+string ToRevCodeW(int v, int width) {
+    if (v >= 0) return ToDirectCodeW(v, width);
+    string mag = ToBinary(abs(v), width);
+    for (char& c : mag) c = (c == '0' ? '1' : '0');
+    return "1." + mag;
+}
+
+// ─юяюыэшЄхы№э√щ ъюф ё чрфрээющ °шЁшэющ
+string ToDopCodeW(int v, int width) {
+    if (v >= 0) return ToDirectCodeW(v, width);
+    int magVal = (1 << width) - abs(v);
+    string mag = ToBinary(magVal, width);
+    return "1." + mag;
+}
+
+// ╠юфшЇшЎшЁютрээ√щ фюяюыэшЄхы№э√щ ъюф ё чрфрээющ °шЁшэющ
+string ToModCodeW(int v, int width) {
+    if (v >= 0) return "00." + ToBinary(abs(v), width);
+    int magVal = (1 << width) - abs(v);
+    string mag = ToBinary(magVal, width);
+    return "11." + mag;
+}
+
+// ╧Ё ьющ ъюф схч чэрър (фы  т√тюфр A(2), B(2), R(2))
 string ToDirectCode(int v, bool hasAddSign) {
     string ans;
     int absV = std::abs(v);
@@ -108,7 +129,7 @@ string ToDirectCode(int v, bool hasAddSign) {
         ans.insert(0, to_string(absV % 2));
         absV /= 2;
     } while (absV > 0);
-    if(hasAddSign)
+    if (hasAddSign)
         if (v < 0)
             ans.insert(0, "1.");
         else
@@ -116,162 +137,120 @@ string ToDirectCode(int v, bool hasAddSign) {
     return ans;
 }
 
-string ToRevCode(int v, bool hasAddSign) {
-    string ans;
-    int absV = std::abs(v);
-    if (v < 0) {
-        do {
-            ans.insert(0, to_string((absV % 2 + 1) % 2));
-            absV /= 2;
-        } while (absV > 0);
-        if(hasAddSign)
-            ans.insert(0, "1.");
-    }
-    else {
-        ans = ToDirectCode(v, hasAddSign);
-    }
-    return ans;
-}
-
-string ToDopCode(int v, bool hasAddSign) {
-    string revCode;
-    if (v < 0) {
-        revCode = ToRevCode(v, hasAddSign);
-        for (int i = revCode.length() - 1; i >= 0; i--) {
-            if (revCode[i] == '0') {
-                revCode[i] = '1';
-                break;
-            }
-            else if (revCode[i] == '1') {
-                revCode[i] = '0';
-            }
-        }
-    }
-    else {
-        revCode = ToDirectCode(v, hasAddSign);
-    }
-    return revCode;
-}
-
-string ToModCode(int v, bool hasAddSign) {
-    string ans = ToDopCode(v, hasAddSign);
-    if (hasAddSign)
-        ans = ans[0] + ans;
-    return ans;
-}
-
-void PrintTable(int a, int b)
-{
+// ╥рсышЎр ъюфют фы  A ш B
+void PrintTable(int a, int b, int width) {
     cout << "A(2) = ";
-    if (a < 0)
-        cout << "-";
-    string doubleA = ToDirectCode(a, false);
-    cout << doubleA << endl;
+    if (a < 0) cout << "-";
+    cout << ToDirectCode(a, false) << endl;
+
     cout << "B(2) = ";
-    if (b < 0)
-        cout << "-";
-    string doubleB = ToDirectCode(b, false);
-    cout << doubleB << endl;
-    
-    
-    int len = max(doubleA.length(), doubleB.length())+2;
-    cout << "    A(2)";
-    for (int i = 2; i < len; i++)
-        cout << " ";
-    cout << "-A(2)";
-    for (int i = 2; i < len; i++)
-        cout << " ";
-    cout << "B(2)";
-    for (int i = 2; i < len; i++)
-        cout << " ";
-    cout << "-B(2)";
-    for (int i = 2; i < len; i++)
-        cout << " ";
-    cout << endl;
-    cout << "П   " << ToDirectCode(a, true) << "  " << ToDirectCode(-a, true) << "  " << ToDirectCode(b, true) << "  " << ToDirectCode(-b, true) << endl;
-    for (int i = 0; i < len * 5; i++)
-        cout << "-";
-    cout << endl;
-    cout << "ОК  " << ToRevCode(a, true) << "  " << ToRevCode(-a, true) << "  " << ToRevCode(b, true) << "  " << ToRevCode(-b, true) << endl;
-    for (int i = 0; i < len * 4 + 4; i++)
-        cout << "-";
-    cout << endl;
-    cout << "ДК  " << ToDopCode(a, true) << "  " << ToDopCode(-a, true) << "  " << ToDopCode(b, true) << "  " << ToDopCode(-b, true) << endl;
-    for (int i = 0; i < len * 4 + 4; i++)
-        cout << "-";
-    cout << endl;
-    cout << "МДК " << ToModCode(a, true) << " " << ToModCode(-a, true) << " " << ToModCode(b, true) << " " << ToModCode(-b, true) << endl;
-    for (int i = 0; i < len * 4 + 4; i++)
-        cout << "-";
-    cout << endl;
+    if (b < 0) cout << "-";
+    cout << ToDirectCode(b, false) << endl;
 
+    int colw = width + 5;
+    cout << setw(colw) << "A(2)"
+        << setw(colw) << "-A(2)"
+        << setw(colw) << "B(2)"
+        << setw(colw) << "-B(2)" << endl;
 
+    cout << "╧   "
+        << setw(colw) << ToDirectCodeW(a, width)
+        << setw(colw) << ToDirectCodeW(-a, width)
+        << setw(colw) << ToDirectCodeW(b, width)
+        << setw(colw) << ToDirectCodeW(-b, width) << endl;
+
+    cout << "╬╩  "
+        << setw(colw) << ToRevCodeW(a, width)
+        << setw(colw) << ToRevCodeW(-a, width)
+        << setw(colw) << ToRevCodeW(b, width)
+        << setw(colw) << ToRevCodeW(-b, width) << endl;
+
+    cout << "─╩  "
+        << setw(colw) << ToDopCodeW(a, width)
+        << setw(colw) << ToDopCodeW(-a, width)
+        << setw(colw) << ToDopCodeW(b, width)
+        << setw(colw) << ToDopCodeW(-b, width) << endl;
+
+    cout << "╠─╩ "
+        << setw(colw) << ToModCodeW(a, width)
+        << setw(colw) << ToModCodeW(-a, width)
+        << setw(colw) << ToModCodeW(b, width)
+        << setw(colw) << ToModCodeW(-b, width) << endl;
+
+    cout << string(colw * 4, '-') << endl;
 }
 
 int main() {
     SetConsoleCP(866);
     SetConsoleOutputCP(866);
-    bool isInputCodeNumber = true, isInputC = true, isInputLimit = true, isInputExit = false;
-    while (!isInputExit) {
-        isInputLimit = true;
-        while (isInputLimit) {
-            int a, b, c, k;
-            InputAB(a, b);
-            PrintTable(a, b);
-            isInputC = true;
-            while (isInputC) {
-                bool isNegZero = false;
-                InputC(a, b, c, isNegZero);
-                isInputCodeNumber = true;
-                while (isInputCodeNumber) {
-                    SelectMachineCode(k);
-                    string code;
-                    bool special = false;
-                    switch (k) {
-                    case 1:
-                        cout << "Прямой код" << endl;
-                        if (isNegZero)
-                            code = "1.0";
-                        else
-                            code = ToDirectCode(c, true);
-                        break;
-                    case 2:
-                        cout << "Обратный код" << endl;
-                        if (isNegZero)
-                            code = "1.1";
-                        else
-                            code = ToRevCode(c, true);
-                        break;
-                    case 3:
-                        cout << "Дополнительный код" << endl;
-                        if (isNegZero)
-                        {
-                            special = true;
-                            cout << "для -0 не существует" << endl;
-                        }
-                        else
-                            code = ToDopCode(c, true);
-                        break;
-                    default:
-                        cout << "Модифицированный дополнительный код" << endl;
-                        if (isNegZero)
-                        {
-                            special = true;
-                            cout << "для -0 не существует" << endl;
-                        }
-                        else
-                            code = ToModCode(c, true);
-                        break;
-                    }
-                    if (!special)
-                        cout << "C=" << code << endl;
-                    isInputCodeNumber = YesNo("Выбрать новый номер машинного кода?", "Y/N | да/нет ", "Ошибка запроса на ввод нового номера машинного кода");
+
+    while (true) {
+        int a, b;
+        InputAB(a, b);
+
+        // ╪шЁшэр фы  ЄрсышЎ√
+        int width = max(max(bits(abs(a)), bits(abs(b))), 1);
+        PrintTable(a, b, width);
+
+        int k;
+        bool opDone = false;
+        while (!opDone) {
+            SelectMachineCode(k);
+            if (k == 3) {
+                // ┬√яюыэ хь Єюы№ъю A + B
+                int r = a + b;
+                int resWidth = max(max(bits(abs(a)), bits(abs(b))), bits(abs(r))) + 1;
+
+                cout << "A + B" << endl;
+
+                string mdkA = ToModCodeW(a, resWidth);
+                string mdkB = ToModCodeW(b, resWidth);
+                string mdkR = ToModCodeW(r, resWidth);
+
+                cout << "  " << mdkA << endl;
+                cout << "+ " << mdkB << endl;
+                cout << string(mdkA.length() + 2, '-') << endl;
+                cout << "  " << mdkR << endl;
+
+                cout << "[R]ьфъ = " << mdkR << endl;
+
+                if (r >= 0) {
+                    cout << "[R]я = " << ToDirectCodeW(r, resWidth) << endl;
+                    cout << "R(2)  = " << ToDirectCode(r, false) << endl;
+                    cout << "R(10) = " << r << endl;
                 }
-                isInputC = YesNo("Ввести новое значение числа С?", "Y/N | да/нет ", "Ошибка запроса на ввод нового значения числа С");
+                else {
+                    cout << "[R]фъ = " << ToDopCodeW(r, resWidth) << endl;
+                    cout << "[R]юъ = " << ToRevCodeW(r, resWidth) << endl;
+                    cout << "[R]я = " << ToDirectCodeW(r, resWidth) << endl;
+                    cout << "R(2)  = -" << ToDirectCode(r, false) << endl;
+                    cout << "R(10) = " << r << endl;
+                }
+                opDone = true;
             }
-            isInputLimit = YesNo("Ввести новые границы диапазона?", "Y/N | да/нет ", "Ошибка запроса на ввод новых границ диапазона");
+            else {
+                cout << "╬яхЁрЎш  эх Ёхрышчютрэр" << endl;
+            }
         }
-        isInputExit = YesNo("Завершить программу?", "Y/N | да/нет ", "Ошибка запроса на завершение программы");
+
+        // ╪ру 6: эют√х шёїюфэ√х ўшёыр?
+        if (YesNo("┬тхёЄш эют√х чэрўхэш  шёїюфэ√ї ўшёхы?",
+            "Y/N | фр/эхЄ ",
+            "╬°шсър чряЁюёр эр ттюф эют√ї чэрўхэшщ шёїюфэ√ї ўшёхы")) {
+            continue;
+        }
+        else {
+            // ╪ру 8: чртхЁ°хэшх яЁюуЁрьь√?
+            if (YesNo("╟ртхЁ°шЄ№ яЁюуЁрььє?",
+                "Y/N | фр/эхЄ ",
+                "╬°шсър чряЁюёр эр чртхЁ°хэшх яЁюуЁрьь√")) {
+                break;
+            }
+            else {
+                continue;
+            }
+        }
     }
+
     return 0;
 }
