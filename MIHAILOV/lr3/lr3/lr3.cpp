@@ -8,12 +8,6 @@
 #include <cstdlib>
 using namespace std;
 
-int main()
-{
-    std::cout << "(+)\n";
-}
-
-
 // Чтение целого числа из строки
 bool ReadInt(int& value) {
     string s;
@@ -35,7 +29,7 @@ void InputAB(int& a, int& b) {
         isANum = ReadInt(a);
         cout << "B = ";
         isBNum = ReadInt(b);
-        if (!isANum || !isBNum)
+        if (!isANum || !isBNum || abs(a)>=abs(b))
             cout << "Ошибка ввода исходных чисел" << endl;
     }
 }
@@ -55,7 +49,7 @@ void SelectMachineCode(int& k) {
             ok = (k >= 1 && k <= 4);
         }
         if (!ok) {
-            cout << "Ошибка ввода номера операции" << endl;
+            cout << "Ошибка ввода номера способа деления" << endl;
         }
     }
 }
@@ -146,54 +140,140 @@ string ToDirectCode(int v, bool hasAddSign) {
 // Таблица кодов для A и B
 void PrintTable(int a, int b, int width) {
     cout << "A(2) = ";
-    if (a < 0) cout << "-";
     cout << ToDirectCode(a, false) << endl;
 
     cout << "B(2) = ";
     if (b < 0) cout << "-";
     cout << ToDirectCode(b, false) << endl;
 
+    int za = 0;
+    cout << "ZA = ";
+    if (a < 0) {
+        cout << "1";
+        za = 1;
+    }
+    else
+        cout << "0";
+    cout << endl;
+
+    int zb = 0;
+    cout << "ZB = ";
+    if (b < 0) {
+        cout << "1";
+        zb = 1;
+    }
+    else
+        cout << "0";
+    cout << endl;
+    
+    cout << "ZR = ZA (+) ZB = " << (za+zb)%2 << endl;
+
+    int absA = abs(a), absB = abs(b);
+
     int colw = width + 5;
-    cout << setw(colw) << "A(2)"
-        << setw(colw) << "-A(2)"
-        << setw(colw) << "B(2)"
-        << setw(colw) << "-B(2)" << endl;
+    cout << setw(colw) << "|A(2)|"
+        << setw(colw) << "|B(2)|"
+        << setw(colw) << "-|B(2)|" << endl;
     cout << string(colw * 4 + 4, '-') << endl;
 
     cout << "П   "
-        << setw(colw) << ToDirectCodeW(a, width)
-        << setw(colw) << ToDirectCodeW(-a, width)
-        << setw(colw) << ToDirectCodeW(b, width)
-        << setw(colw) << ToDirectCodeW(-b, width) << endl;
+        << setw(colw) << ToDirectCodeW(absA, width)
+        << setw(colw) << ToDirectCodeW(absB, width)
+        << setw(colw) << ToDirectCodeW(-absB, width) << endl;
     cout << string(colw * 4 + 4, '-') << endl;
 
     cout << "ОК  "
-        << setw(colw) << ToRevCodeW(a, width)
-        << setw(colw) << ToRevCodeW(-a, width)
-        << setw(colw) << ToRevCodeW(b, width)
-        << setw(colw) << ToRevCodeW(-b, width) << endl;
+        << setw(colw) << ToRevCodeW(absA, width)
+        << setw(colw) << ToRevCodeW(absB, width)
+        << setw(colw) << ToRevCodeW(-absB, width) << endl;
     cout << string(colw * 4 + 4, '-') << endl;
 
     cout << "ДК  "
-        << setw(colw) << ToDopCodeW(a, width)
-        << setw(colw) << ToDopCodeW(-a, width)
-        << setw(colw) << ToDopCodeW(b, width)
-        << setw(colw) << ToDopCodeW(-b, width) << endl;
+        << setw(colw) << ToDopCodeW(absA, width)
+        << setw(colw) << ToDopCodeW(absB, width)
+        << setw(colw) << ToDopCodeW(-absB, width) << endl;
     cout << string(colw * 4 + 4, '-') << endl;
 
     cout << "МДК "
-        << setw(colw) << ToModCodeW(a, width)
-        << setw(colw) << ToModCodeW(-a, width)
-        << setw(colw) << ToModCodeW(b, width)
-        << setw(colw) << ToModCodeW(-b, width) << endl;
+        << setw(colw) << ToModCodeW(absA, width)
+        << setw(colw) << ToModCodeW(absB, width)
+        << setw(colw) << ToModCodeW(-absB, width) << endl;
 
     cout << string(colw * 4 + 4, '-') << endl;
 }
+
+
+
+// Двоичное представление числа v в поле width бит
+string toBin(long long v, int width) {
+    string s(width, '0');
+    for (int i = 0; i < width; i++) {
+        if ((v >> (width - 1 - i)) & 1) s[i] = '1';
+    }
+    return s;
+}
+
+// Формат "s.xxxxx" — знак, точка, двоичные разряды
+string fmt(long long v, int width) {
+    string sign = (v < 0) ? "1" : "0";
+    return sign + "." + toBin(llabs(v), width);
+}
+
+void divideWithRestore(long A, long B, int steps) {
+    long R = A;
+    long Bshift = B << steps;   // делитель, сдвинутый влево на steps
+    long Q = 0;                 // частное
+
+    // ширина поля для вывода
+    int width = max(bits(Bshift), max(bits(A), bits(R))) + 1;
+
+    cout << "  Делимое  A = " << A << endl;
+    cout << "  Делитель B = " << B << endl;
+    cout << "  Шагов    = " << steps << endl;
+    cout << "  Ширина   = " << width << " бит" << endl;
+    cout << endl;
+
+    for (int i = steps; i >= 0; i--) {
+        cout << "--- Шаг " << (steps - i + 1) << " (i = " << i << ") ---" << endl;
+
+        cout << "  " << fmt(R, width) << "   R" << endl;
+        cout << "  " << fmt(Bshift, width) << "   B·2^" << i << endl;
+        cout << "  " << string(width + 4, '-') << endl;
+
+        long sub = R - Bshift;
+        cout << "  " << fmt(sub, width) << "   R - B·2^" << i;
+        if (sub < 0) cout << "  < 0";
+        cout << endl;
+
+        if (sub >= 0) {
+            R = sub;
+            Q |= (1LL << i);
+            cout << "  Частный бит = 1" << endl;
+        }
+        else {
+            cout << "  " << fmt(R, width) << "   ВО" << endl;
+            cout << "  Частный бит = 0" << endl;
+        }
+
+        if (i > 0) {
+            Bshift >>= 1;
+            cout << "  " << fmt(Bshift, width) << "   <-" << endl;
+        }
+        cout << endl;
+    }
+
+    cout << "  Результат:" << endl;
+    cout << "  Частное Q = " << Q << " = " << toBin(Q, steps + 1) << "(2)" << endl;
+    cout << "  Остаток R = " << R << " = " << toBin(R, width) << "(2)" << endl;
+    cout << "  Проверка: " << A << " = " << Q << " * " << B << " + " << R << endl;
+}
+
 
 int main() {
     SetConsoleCP(866);
     SetConsoleOutputCP(866);
 
+    SetConsoleOutputCP(1251);
     while (true) {
         int a, b;
         InputAB(a, b);
@@ -203,44 +283,28 @@ int main() {
 
         int k;
         bool opDone = false;
-        while (!opDone) {
-            SelectMachineCode(k);
-            if (k == 3) {
-                PrintTable(a, b, width);
-                // Выполняем только A + B
-                int r = a + b;
+        int step = 2;
+        SelectMachineCode(k);
+        if (k == 2) {
+            PrintTable(a, b, width);
+            // Выполняем только деление с восстановлением остатка и сдвигом делителя
+            cout << "Деление с восстановлением остатка и сдвигом делителя" << endl;
+            while (!opDone) {
 
-                cout << "A + B" << endl;
-
-                string mdkA = ToModCodeW(a, width);
-                string mdkB = ToModCodeW(b, width);
-                string mdkR = ToModCodeW(r, width);
-
-                cout << " " << mdkA << endl;
-                cout << "+" << endl;
-                cout << " " << mdkB << endl;
-                cout << string(mdkA.length() + 2, '-') << endl;
-                cout << " " << mdkR << endl;
-
-                cout << "[R]мдк = " << mdkR << endl;
-
-                if (r >= 0) {
-                    cout << "[R]п = " << ToDirectCodeW(r, width) << endl;
-                    cout << "R(2)  = " << ToDirectCode(r, false) << endl;
-                    cout << "R(10) = " << r << endl;
+                divideWithRestore(a, b, step);
+                
+                if (step < width + 1)
+                {
+                    if (YesNo("Продолжить деление ?", "Y/N | да/нет ", "Ошибка запроса на продолжение деления"))
+                        step++;
+                    else
+                        opDone = true;
                 }
-                else {
-                    cout << "[R]дк = " << ToDopCodeW(r, width) << endl;
-                    cout << "[R]ок = " << ToRevCodeW(r, width) << endl;
-                    cout << "[R]п = " << ToDirectCodeW(r, width) << endl;
-                    cout << "R(2)  = -" << ToDirectCode(r, false) << endl;
-                    cout << "R(10) = " << r << endl;
-                }
-                opDone = true;
+                else opDone = true;
             }
-            else {
-                cout << "Операция не реализована" << endl;
-            }
+        }
+        else {
+            cout << "Операция не реализована" << endl;
         }
 
         // Шаг 6: новые исходные числа?
