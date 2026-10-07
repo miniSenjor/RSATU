@@ -152,24 +152,28 @@ void PrintTable(int a, int b, int width) {
         << setw(colw) << "-A(2)"
         << setw(colw) << "B(2)"
         << setw(colw) << "-B(2)" << endl;
+    cout << string(colw * 4 + 4, '-') << endl;
 
     cout << "П   "
         << setw(colw) << ToDirectCodeW(a, width)
         << setw(colw) << ToDirectCodeW(-a, width)
         << setw(colw) << ToDirectCodeW(b, width)
         << setw(colw) << ToDirectCodeW(-b, width) << endl;
+    cout << string(colw * 4 + 4, '-') << endl;
 
     cout << "ОК  "
         << setw(colw) << ToRevCodeW(a, width)
         << setw(colw) << ToRevCodeW(-a, width)
         << setw(colw) << ToRevCodeW(b, width)
         << setw(colw) << ToRevCodeW(-b, width) << endl;
+    cout << string(colw * 4 + 4, '-') << endl;
 
     cout << "ДК  "
         << setw(colw) << ToDopCodeW(a, width)
         << setw(colw) << ToDopCodeW(-a, width)
         << setw(colw) << ToDopCodeW(b, width)
         << setw(colw) << ToDopCodeW(-b, width) << endl;
+    cout << string(colw * 4 + 4, '-') << endl;
 
     cout << "МДК "
         << setw(colw) << ToModCodeW(a, width)
@@ -177,7 +181,7 @@ void PrintTable(int a, int b, int width) {
         << setw(colw) << ToModCodeW(b, width)
         << setw(colw) << ToModCodeW(-b, width) << endl;
 
-    cout << string(colw * 4, '-') << endl;
+    cout << string(colw * 4 + 4, '-') << endl;
 }
 
 int main() {
@@ -189,40 +193,40 @@ int main() {
         InputAB(a, b);
 
         // Ширина для таблицы
-        int width = max(max(bits(abs(a)), bits(abs(b))), 1);
-        PrintTable(a, b, width);
+        int width = max(max(bits(abs(a)), bits(abs(b))), 1) + 1;
 
         int k;
         bool opDone = false;
         while (!opDone) {
             SelectMachineCode(k);
             if (k == 3) {
+                PrintTable(a, b, width);
                 // Выполняем только A + B
                 int r = a + b;
-                int resWidth = max(max(bits(abs(a)), bits(abs(b))), bits(abs(r))) + 1;
-
+                
                 cout << "A + B" << endl;
 
-                string mdkA = ToModCodeW(a, resWidth);
-                string mdkB = ToModCodeW(b, resWidth);
-                string mdkR = ToModCodeW(r, resWidth);
+                string mdkA = ToModCodeW(a, width);
+                string mdkB = ToModCodeW(b, width);
+                string mdkR = ToModCodeW(r, width);
 
-                cout << "  " << mdkA << endl;
-                cout << "+ " << mdkB << endl;
+                cout << " " << mdkA << endl;
+                cout << "+" << endl;
+                cout << " " << mdkB << endl;
                 cout << string(mdkA.length() + 2, '-') << endl;
-                cout << "  " << mdkR << endl;
+                cout << " " << mdkR << endl;
 
                 cout << "[R]мдк = " << mdkR << endl;
 
                 if (r >= 0) {
-                    cout << "[R]п = " << ToDirectCodeW(r, resWidth) << endl;
+                    cout << "[R]п = " << ToDirectCodeW(r, width) << endl;
                     cout << "R(2)  = " << ToDirectCode(r, false) << endl;
                     cout << "R(10) = " << r << endl;
                 }
                 else {
-                    cout << "[R]дк = " << ToDopCodeW(r, resWidth) << endl;
-                    cout << "[R]ок = " << ToRevCodeW(r, resWidth) << endl;
-                    cout << "[R]п = " << ToDirectCodeW(r, resWidth) << endl;
+                    cout << "[R]дк = " << ToDopCodeW(r, width) << endl;
+                    cout << "[R]ок = " << ToRevCodeW(r, width) << endl;
+                    cout << "[R]п = " << ToDirectCodeW(r, width) << endl;
                     cout << "R(2)  = -" << ToDirectCode(r, false) << endl;
                     cout << "R(10) = " << r << endl;
                 }
