@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
+#include <vector>
 using namespace std;
 
 // Чтение целого числа из строки
@@ -22,14 +23,14 @@ bool ReadInt(int& value) {
 // Ввод A и B
 void InputAB(int& a, int& b) {
     bool isANum = false, isBNum = false;
-    while (!isANum || !isBNum) {
+    while (!isANum || !isBNum || abs(a) >= abs(b)) {
         a = b = 0;
         cout << "Введите два целых десятичных числа |A| < |B|:" << endl;
         cout << "A = ";
         isANum = ReadInt(a);
         cout << "B = ";
         isBNum = ReadInt(b);
-        if (!isANum || !isBNum || abs(a)>=abs(b))
+        if (!isANum || !isBNum || abs(a) >= abs(b))
             cout << "Ошибка ввода исходных чисел" << endl;
     }
 }
@@ -219,55 +220,105 @@ string fmt(long long v, int width) {
     return sign + "." + toBin(llabs(v), width);
 }
 
-void divideWithRestore(long A, long B, int steps) {
-    long R = A;
-    long Bshift = B << steps;   // делитель, сдвинутый влево на steps
-    long Q = 0;                 // частное
+string toMDK(long long v, int width) {
+    long long mod = 1LL << width;
+    long long mag = ((v % mod) + mod) % mod;   // модуль в field width
+    string sign = (v < 0) ? "11" : "00";
+    return sign + "." + toBin(mag, width);
+}
+void divideMDK(long long A, long long B, int steps, bool onlyResult = false, bool skip = false) {
+    long long absA = llabs(A);
+    long long absB = llabs(B);
 
-    // ширина поля для вывода
-    int width = max(bits(Bshift), max(bits(A), bits(R))) + 1;
+    int width = max(bits(absA), bits(absB));
 
-    cout << "  Делимое  A = " << A << endl;
-    cout << "  Делитель B = " << B << endl;
-    cout << "  Шагов    = " << steps << endl;
-    cout << "  Ширина   = " << width << " бит" << endl;
-    cout << endl;
+    long long R = absA;
+    long long Bshift = -absB;
 
-    for (int i = steps; i >= 0; i--) {
-        cout << "--- Шаг " << (steps - i + 1) << " (i = " << i << ") ---" << endl;
+    bool negQ = (A < 0) != (B < 0);
 
-        cout << "  " << fmt(R, width) << "   R" << endl;
-        cout << "  " << fmt(Bshift, width) << "   B·2^" << i << endl;
-        cout << "  " << string(width + 4, '-') << endl;
+    vector<int> qbits;
 
-        long sub = R - Bshift;
-        cout << "  " << fmt(sub, width) << "   R - B·2^" << i;
-        if (sub < 0) cout << "  < 0";
-        cout << endl;
-
-        if (sub >= 0) {
-            R = sub;
-            Q |= (1LL << i);
-            cout << "  Частный бит = 1" << endl;
-        }
-        else {
-            cout << "  " << fmt(R, width) << "   ВО" << endl;
-            cout << "  Частный бит = 0" << endl;
-        }
-
-        if (i > 0) {
-            Bshift >>= 1;
-            cout << "  " << fmt(Bshift, width) << "   <-" << endl;
-        }
-        cout << endl;
+    if (!onlyResult) {
+        cout << "  " << toMDK(R, width) << endl;
+        cout << "  " << toMDK(Bshift, width) << endl;
     }
 
-    cout << "  Результат:" << endl;
-    cout << "  Частное Q = " << Q << " = " << toBin(Q, steps + 1) << "(2)" << endl;
-    cout << "  Остаток R = " << R << " = " << toBin(R, width) << "(2)" << endl;
-    cout << "  Проверка: " << A << " = " << Q << " * " << B << " + " << R << endl;
-}
+    for (int i = 0; i < steps; i++) {
+        long long Rnew = R + Bshift;
 
+        if (!onlyResult) {
+            cout << "  " << string(width + 4, '-') << endl;
+            cout << "  " << toMDK(Rnew, width);
+            if (Rnew < 0) cout << " < 0";
+            else          cout << " > 0";
+            cout << endl;
+        }
+
+        int bit;
+        if (Rnew < 0) {
+            bit = 0;
+            if (!onlyResult && i + 1 < steps)
+                cout << "  " << toMDK(R, width) << " ВО" << endl;
+        }
+        else {
+            bit = 1;
+            R = Rnew;
+        }
+        qbits.push_back(bit);
+
+        if (i < steps - 1) {
+            Bshift >>= 1;
+            if (!onlyResult)
+                cout << "  " << toMDK(Bshift, width) << " <-" << endl;
+        }
+    }
+
+    if (onlyResult) {
+        // qbits[0] — целая часть, qbits[1..] — дробные биты
+        vector<int> frac(qbits.begin() + 1, qbits.end());
+
+        // Отбрасываем последний (защитный) бит с округлением
+        if (!frac.empty()) {
+            int guard = frac.back();
+            frac.pop_back();
+            if (guard == 1) {
+                // Прибавляем 1 к младшему разряду с переносом
+                int i = (int)frac.size() - 1;
+                while (i >= 0 && frac[i] == 1) {
+                    frac[i] = 0;
+                    i--;
+                }
+                if (i >= 0)
+                    frac[i] = 1;
+                // при переполнении через всю дробь — целая часть не меняется,
+                // т.к. |A| < |B| и целая часть всегда 0
+            }
+        }
+
+        // Сборка строки результата
+        string qstr = "0.";
+        if (frac.empty())
+            qstr = "0";
+        for (int b : frac)
+            qstr += to_string(b);
+
+        // Значение частного как дробь
+        double qval = 0;
+        for (size_t i = 0; i < frac.size(); i++)
+            qval += frac[i] * (1.0 / (1LL << (i + 1)));
+        if (negQ) qval = -qval;
+        
+        if (skip)
+            cout << "|R(2)|окр = ";
+        else
+            cout << "|R(2)| = ";
+        cout << qstr << endl;
+        cout << "R(2) = " << (negQ ? "-" : "") << qstr << endl;
+        cout << "R(10) = " << qval << endl;
+        cout << endl;
+    }
+}
 
 int main() {
     SetConsoleCP(866);
@@ -279,7 +330,7 @@ int main() {
         InputAB(a, b);
 
         // Ширина для таблицы
-        int width = max(max(bits(abs(a)), bits(abs(b))), 1) + 1;
+        int width = max(max(bits(abs(a)), bits(abs(b))), 1);
 
         int k;
         bool opDone = false;
@@ -289,18 +340,28 @@ int main() {
             PrintTable(a, b, width);
             // Выполняем только деление с восстановлением остатка и сдвигом делителя
             cout << "Деление с восстановлением остатка и сдвигом делителя" << endl;
+            int maxSteps = width + 1;
             while (!opDone) {
 
-                divideWithRestore(a, b, step);
+                //divideWithRestore(a, b, step);
+                divideMDK(a, b, step);
                 
-                if (step < width + 1)
-                {
-                    if (YesNo("Продолжить деление ?", "Y/N | да/нет ", "Ошибка запроса на продолжение деления"))
+                if (step < maxSteps) {
+                    if (YesNo("Продолжить деление ?", "Y/N | да/нет ",
+                        "Ошибка запроса на продолжение деления")) {
                         step++;
-                    else
+                    }
+                    else {
+                        // Пользователь сказал «нет» — пропускаем шаги и сразу ответ
+                        divideMDK(a, b, maxSteps, true, true);
                         opDone = true;
+                    }
                 }
-                else opDone = true;
+                else {
+                    // Дошли до максимума — печатаем результат
+                    divideMDK(a, b, maxSteps, true);
+                    opDone = true;
+                }
             }
         }
         else {

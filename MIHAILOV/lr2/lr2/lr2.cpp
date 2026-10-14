@@ -187,6 +187,7 @@ void PrintTable(int a, int b, int width) {
 int main() {
     SetConsoleCP(866);
     SetConsoleOutputCP(866);
+    SetConsoleOutputCP(1251);
 
     while (true) {
         int a, b;
