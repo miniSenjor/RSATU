@@ -32,12 +32,23 @@ bool CheckHex8(string& s)
     return true;
 }
 
+int ConvertBinToInt(string &bin)
+{
+    int res = 0;
+    for (int i = 1; i <= 8; i++)
+    {
+        if (bin[i] == '1')
+            res += pow(2, 8 - i);
+    }
+    return res;
+}
+
 // Ввод A и B
 void InputAB(string& a, string& b) {
     bool isANum = false, isBNum = false;
     while (!isANum || !isBNum) {
         cout << "Введите через запятую два восьмиразрядных шестнадцатеричных числа (А, В):" << endl;
-        string input, a, b;
+        string input;
         getline(cin, input);
         int startB = (int)input.find(", ", 0);
         a = input.substr(0, startB);
@@ -278,7 +289,13 @@ int main() {
         SelectMachineCode(k);
         string binA = ConvertHex8ToBin(a);
         string binB = ConvertHex8ToBin(b);
-        cout << "ZA = " << binA[0] << " ИПА = ";
+        int decA = ConvertBinToInt(binA);
+        int decB = ConvertBinToInt(binB);
+        //не робит формула истинного порядка числа
+        int IPA = (int)floor(log2((double)llabs(decA)));
+        int IPB = (int)floor(log2((double)llabs(decB)));
+        cout << "ZA = " << binA[0] << " ИПА = " << IPA << " mA = " << endl;
+        cout << "ZB = " << binB[0] << " ИПB = " << IPB << " mB = " << endl;
         switch (k)
         {
         case 1:
