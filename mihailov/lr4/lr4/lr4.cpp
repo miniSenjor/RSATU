@@ -1,5 +1,4 @@
-﻿//второй метод деления с восстановлением остатка и сдвигом делителя
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <sstream>
 #include <windows.h>
@@ -26,7 +25,7 @@ bool CheckHex8(string& s)
         return false;
     for (char c : s)
     {
-        if ((s[0] < 'A' || s[0] > 'F') && (s[0] < '0' && s[0] > '9'))
+        if ((s[0] < 'A' || s[0] > 'F') && (s[0] < '0' || s[0] > '9'))
             return false;
     }
     return true;
@@ -105,127 +104,6 @@ int bits(int x) {
         x >>= 1;
     }
     return count;
-}
-
-// Двоичное представление числа v в поле width бит
-string ToBinary(int v, int width) {
-    string s(width, '0');
-    for (int i = 0; i < width; ++i) {
-        if ((v >> (width - 1 - i)) & 1)
-            s[i] = '1';
-    }
-    return s;
-}
-
-// Прямой код с заданной шириной
-string ToDirectCodeW(int v, int width) {
-    string mag = ToBinary(abs(v), width);
-    return (v < 0 ? "1." : "0.") + mag;
-}
-
-// Обратный код с заданной шириной
-string ToRevCodeW(int v, int width) {
-    if (v >= 0) return ToDirectCodeW(v, width);
-    string mag = ToBinary(abs(v), width);
-    for (char& c : mag) c = (c == '0' ? '1' : '0');
-    return "1." + mag;
-}
-
-// Дополнительный код с заданной шириной
-string ToDopCodeW(int v, int width) {
-    if (v >= 0) return ToDirectCodeW(v, width);
-    int magVal = (1 << width) - abs(v);
-    string mag = ToBinary(magVal, width);
-    return "1." + mag;
-}
-
-// Модифицированный дополнительный код с заданной шириной
-string ToModCodeW(int v, int width) {
-    if (v >= 0) return "00." + ToBinary(abs(v), width);
-    int magVal = (1 << width) - abs(v);
-    string mag = ToBinary(magVal, width);
-    return "11." + mag;
-}
-
-// Прямой код без знака (для вывода A(2), B(2), R(2))
-string ToDirectCode(int v, bool hasAddSign) {
-    string ans;
-    int absV = std::abs(v);
-    do {
-        ans.insert(0, to_string(absV % 2));
-        absV /= 2;
-    } while (absV > 0);
-    if (hasAddSign)
-        if (v < 0)
-            ans.insert(0, "1.");
-        else
-            ans.insert(0, "0.");
-    return ans;
-}
-
-// Таблица кодов для A и B
-void PrintTable(int a, int b, int width) {
-    cout << "A(2) = ";
-    cout << ToDirectCode(a, false) << endl;
-
-    cout << "B(2) = ";
-    if (b < 0) cout << "-";
-    cout << ToDirectCode(b, false) << endl;
-
-    int za = 0;
-    cout << "ZA = ";
-    if (a < 0) {
-        cout << "1";
-        za = 1;
-    }
-    else
-        cout << "0";
-    cout << endl;
-
-    int zb = 0;
-    cout << "ZB = ";
-    if (b < 0) {
-        cout << "1";
-        zb = 1;
-    }
-    else
-        cout << "0";
-    cout << endl;
-
-    cout << "ZR = ZA (+) ZB = " << (za + zb) % 2 << endl;
-
-    int absA = abs(a), absB = abs(b);
-
-    int colw = width + 5;
-    cout << setw(colw) << "|A(2)|"
-        << setw(colw) << "|B(2)|"
-        << setw(colw) << "-|B(2)|" << endl;
-    cout << string(colw * 4 + 4, '-') << endl;
-
-    cout << "П   "
-        << setw(colw) << ToDirectCodeW(absA, width)
-        << setw(colw) << ToDirectCodeW(absB, width)
-        << setw(colw) << ToDirectCodeW(-absB, width) << endl;
-    cout << string(colw * 4 + 4, '-') << endl;
-
-    cout << "ОК  "
-        << setw(colw) << ToRevCodeW(absA, width)
-        << setw(colw) << ToRevCodeW(absB, width)
-        << setw(colw) << ToRevCodeW(-absB, width) << endl;
-    cout << string(colw * 4 + 4, '-') << endl;
-
-    cout << "ДК  "
-        << setw(colw) << ToDopCodeW(absA, width)
-        << setw(colw) << ToDopCodeW(absB, width)
-        << setw(colw) << ToDopCodeW(-absB, width) << endl;
-    cout << string(colw * 4 + 4, '-') << endl;
-
-    cout << "МДК "
-        << setw(colw) << ToModCodeW(absA, width)
-        << setw(colw) << ToModCodeW(absB, width)
-        << setw(colw) << ToModCodeW(-absB, width) << endl;
-
-    cout << string(colw * 4 + 4, '-') << endl;
 }
 
 // Двоичное представление числа v в поле width бит
@@ -314,24 +192,20 @@ string addOne(string s) {
 }
 // Коды мантиссы: m = "0,xxxx", sign = 0/1
 string cP(const string& m, int s) {
-    //string f = m.substr(2);
     if (m.find('1') == string::npos) return (s ? "1.0,0" : "0.0,0");
     return string(1, '0' + s) + ".0," + m;
 }
 string cO(const string& m, int s) {
-    //string f = m.substr(2);
     if (m.find('1') == string::npos) return (s ? "1.1,1" : "0.0,0");
     if (!s) return "0.0," + m;
     return "1.1," + inv(m);
 }
 string cD(const string& m, int s) {
-    //string f = m.substr(2);
     if (m.find('1') == string::npos) return (s ? "не существует" : "0.0,0");
     if (!s) return "0.0," + m;
     return "1.1," + addOne(inv(m));
 }
 string cM(const string& m, int s) {
-    //string f = m.substr(2);
     if (m.find('1') == string::npos) return (s ? "не существует" : "00.0,0");
     if (!s) return "00.0," + m;
     return "11.1," + addOne(inv(m));
@@ -399,7 +273,7 @@ void Sum(Hex8 a, Hex8 b)
             << setw(cw) << fn(mA, a.Z) << setw(cw) << fn(mA, 1 - a.Z)
             << setw(cw) << fn(mB, b.Z) << setw(cw) << fn(mB, 1 - b.Z) << endl;
         };
-    row("ПК", cP); row("ОК", cO); row("ДК", cD); row("МДК", cM);
+    row("П", cP); row("ОК", cO); row("ДК", cD); row("МДК", cM);
     cout << endl;
 
     string mdkA = cM(mA, a.Z), mdkB = cM(mB, b.Z);
@@ -418,7 +292,114 @@ void Sum(Hex8 a, Hex8 b)
     string mR = mdkToNormal(mdkR, ZR);
     cout << "mR(МДК) = " << mdkR << endl;
     if (ZR == 0) {
-        cout << "mR(ПК) = " << cP(mR, 0) << endl;
+        cout << "mR(П) = " << cP(mR, 0) << endl;
+    }
+    else {
+        cout << "mR(ДК) = " << cD(mR, 1) << endl;
+        cout << "mR(ОК) = " << cO(mR, 1) << endl;
+        cout << "mR(ПК) = " << cP(mR, 1) << endl;
+    }
+    cout << endl;
+
+    cout << "mR = 0," << trimFrac(mR.substr(2)) << endl;
+
+    string mRn = mR;
+    int IPn = IPR;
+    bool norm = false;
+    if (mRn.length() > 2 && mRn[2] == '0') {
+        size_t fi = mRn.find('1', 2);
+        if (fi != string::npos && fi > 2) {
+            mRn = "0,1" + mRn.substr(fi + 1);
+            IPn -= (int)(fi - 2);
+            norm = true;
+        }
+    }
+    if (norm) cout << "mR(норм) = 0," << trimFrac(mRn.substr(2)) << endl;
+
+    int SPR = IPn + 127;
+    string SPRb = decToBin8(SPR);
+    string fm = mRn.substr(2);
+    while (fm.length() < 23) fm += "0";
+    string R2 = to_string(ZR) + SPRb + fm;
+
+    cout << "ZR = " << ZR << endl;
+    cout << "СПR(2) = " << SPRb << endl;
+    cout << "R(2) = " << R2 << endl;
+    cout << "R = " << binToHex(R2) << endl;
+}
+
+void normalizeLeft(string& m, int& ip) {
+    while (m[0] == '0') {
+        string frac = m.substr(2);
+        size_t fi = frac.find('1');
+        if (fi == string::npos) return;      // ноль
+        m = "1," + frac.substr(fi + 1) + string(fi, '0');
+        ip -= (int)(fi + 1);
+    }
+}
+
+string normalizeMDK(string mdk, int& ip) {
+    while (mdk.substr(0, 2) == "01" || mdk.substr(0, 2) == "10") {
+        size_t pc = mdk.find(',');
+        string full = mdk.substr(0, 2) + mdk.substr(3, 1) + mdk.substr(pc + 1);
+        char sign = full[0];
+        full = sign + full.substr(0, full.length() - 1);
+        mdk = full.substr(0, 2) + "." + full.substr(2, 1) + "," + full.substr(3);
+        ip++;
+    }
+    return mdk;
+}
+
+void AddSub(Hex8 a, Hex8 b, bool isSub)
+{
+    int IPR = max(a.IP, b.IP);
+    cout << (isSub ? "Вычитание двух чисел A - B" : "Сложение двух чисел A + B") << endl;
+    cout << "Выравненный порядок = " << IPR << endl;
+    if (a.IP < b.IP)
+    {
+        string m = "0," + string(b.IP - a.IP, '0') + a.m;
+        cout << "Уменьшенная мантисса mA’ = " << m << endl;
+    }
+    if (a.IP > b.IP)
+    {
+        string m = "0," + string(a.IP - b.IP, '0') + b.m;
+        cout << "Уменьшенная мантисса mB’ = " << m << endl;
+    }
+    string mA = a.m, mB = b.m;
+    size_t n = max(mA.length(), mB.length());
+    mA = string(n - mA.length(), '0') + mA;
+    mB = string(n - mB.length(), '0') + mB;
+
+    int cw = 15;
+    cout << setw(6) << "" << setw(cw) << "mA" << setw(cw) << "-mA"
+        << setw(cw) << "mB'" << setw(cw) << "-mB'" << endl;
+    cout << string(6 + cw * 4, '-') << endl;
+    auto row = [&](const string& name, string(*fn)(const string&, int)) {
+        cout << setw(6) << name
+            << setw(cw) << fn(mA, a.Z) << setw(cw) << fn(mA, 1 - a.Z)
+            << setw(cw) << fn(mB, b.Z) << setw(cw) << fn(mB, 1 - b.Z) << endl;
+        };
+    row("П", cP); row("ОК", cO); row("ДК", cD); row("МДК", cM);
+    cout << endl;
+
+    string mdkA = cM(mA, a.Z);
+    string mdkB = isSub ? cM(mB, 1 - b.Z) : cM(mB, b.Z);
+    if (mdkA == "не существует" || mdkB == "не существует") {
+        cout << "НЕТ РЕШЕНИЯ" << endl;
+        return;
+    }
+
+    cout << "  " << mdkA << endl;
+    cout << "+ " << mdkB << endl;
+    cout << string(mdkA.length() + 2, '-') << endl;
+    string mdkR = addMDK(mdkA, mdkB);
+    cout << "  " << mdkR << endl << endl;
+
+    int ZR;
+    string mR = mdkToNormal(mdkR, ZR);
+    cout << "mR(МДК) = " << mdkR << endl;
+    if (ZR == 0) {
+        cout << "mR(П) = " << cP(mR, 0) << endl;
     }
     else {
         cout << "mR(ДК) = " << cD(mR, 1) << endl;
@@ -463,8 +444,6 @@ int main() {
         InputAB(a, b);
 
         int k;
-        bool opDone = false;
-        int step = 2;
         SelectMachineCode(k);
         Hex8 hexA(a);
         Hex8 hexB(b);
@@ -476,7 +455,8 @@ int main() {
             Sum(hexA, hexB);
             break;
         case 2:
-            cout << "Операция не реализована" << endl;
+            AddSub(hexA, hexB, true);
+            //cout << "Операция не реализована" << endl;
             break;
         case 3:
             cout << "Операция не реализована" << endl;
