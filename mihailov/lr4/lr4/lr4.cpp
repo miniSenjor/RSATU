@@ -270,7 +270,189 @@ string ConvertHex8ToBin(const string &hex)
     }
     return bin;
 }
+struct Hex8 {
+    string hex, bin, m;
+    int IP, Z;
+    Hex8(const string& h)
+    {
+        hex = h;
+        bin = ConvertHex8ToBin(h);
+        IP = ConvertBinToInt(bin) - 127;
+        Z = bin[0] - '0';
+        m = bin.substr(9, 32 - 9);
+        m = m.substr(0, m.find_last_of('1') + 1);
+    }
+};
+string inv(const string& s) {
+    string r = s;
+    for (char& c : r) c = (c == '0') ? '1' : '0';
+    return r;
+}
+string decToBin8(int n) {
+    string s(8, '0');
+    for (int i = 7; i >= 0; i--) { s[i] = '0' + n % 2; n /= 2; }
+    return s;
+}
+string binToHex(const string& b) {
+    static const char* T[16] = {
+        "0000","0001","0010","0011","0100","0101","0110","0111",
+        "1000","1001","1010","1011","1100","1101","1110","1111" };
+    string h, p = b;
+    while (p.length() % 4) p = "0" + p;
+    for (size_t i = 0; i < p.length(); i += 4) {
+        string n = p.substr(i, 4);
+        for (int j = 0; j < 16; j++) if (T[j] == n) { h += "0123456789ABCDEF"[j]; break; }
+    }
+    return h;
+}
+string addOne(string s) {
+    int i = (int)s.length() - 1;
+    while (i >= 0 && s[i] == '1') { s[i] = '0'; i--; }
+    if (i >= 0) s[i] = '1';
+    else s = "1" + s;
+    return s;
+}
+// Коды мантиссы: m = "0,xxxx", sign = 0/1
+string cP(const string& m, int s) {
+    //string f = m.substr(2);
+    if (m.find('1') == string::npos) return (s ? "1.0,0" : "0.0,0");
+    return string(1, '0' + s) + ".0," + m;
+}
+string cO(const string& m, int s) {
+    //string f = m.substr(2);
+    if (m.find('1') == string::npos) return (s ? "1.1,1" : "0.0,0");
+    if (!s) return "0.0," + m;
+    return "1.1," + inv(m);
+}
+string cD(const string& m, int s) {
+    //string f = m.substr(2);
+    if (m.find('1') == string::npos) return (s ? "не существует" : "0.0,0");
+    if (!s) return "0.0," + m;
+    return "1.1," + addOne(inv(m));
+}
+string cM(const string& m, int s) {
+    //string f = m.substr(2);
+    if (m.find('1') == string::npos) return (s ? "не существует" : "00.0,0");
+    if (!s) return "00.0," + m;
+    return "11.1," + addOne(inv(m));
+}
+string addMDK(const string& a, const string& b) {
+    if (a == "не существует" || b == "не существует") return "не существует";
+    size_t pa = a.find(','), pb = b.find(',');
+    string sa = a.substr(0, 2), va = a.substr(pa + 1);
+    string sb = b.substr(0, 2), vb = b.substr(pb + 1);
+    size_t n = max(va.length(), vb.length());
+    va += string(n - va.length(), '0');
+    vb += string(n - vb.length(), '0');
+    string fa = sa + va, fb = sb + vb, r = fa;
+    int carry = 0;
+    for (int i = (int)fa.length() - 1; i >= 0; i--) {
+        int sum = (fa[i] - '0') + (fb[i] - '0') + carry;
+        r[i] = '0' + sum % 2;
+        carry = sum / 2;
+    }
+    return r.substr(0, 2) + "." + (r.substr(0, 2) == "00" ? "0" : "1") + "," + r.substr(2);
+}
 
+string trimFrac(const string& f) {
+    size_t l = f.find_last_of('1');
+    if (l == string::npos) return "0";
+    return f.substr(0, l + 1);
+}
+string mdkToNormal(const string& mdk, int& sign) {
+    size_t pd = mdk.find('.');
+    size_t pc = mdk.find(',', pd + 1);
+    string sb = mdk.substr(0, pd);
+    string v = mdk.substr(pc + 1);
+    if (sb == "00") { sign = 0; return "0," + v; }
+    if (sb == "11") { sign = 1; return "0," + addOne(inv(v)); }
+    sign = 0;
+    return "0," + v;
+}
+void Sum(Hex8 a, Hex8 b)
+{
+    int IPR = max(a.IP, b.IP);
+    cout << "Сложение двух чисел A + B" << endl;
+    cout << "Выравненный порядок = ";
+    cout << ((a.IP > b.IP) ? a.IP : b.IP) << endl;
+    if (a.IP < b.IP)
+    {
+        string m = "0," + string(b.IP - a.IP, '0') + a.m;
+        cout << "Уменьшенная мантисса mA’ = " << m << endl;
+    }
+    if (a.IP > b.IP)
+    {
+        string m = "0," + string(a.IP - b.IP, '0') + b.m;
+        cout << "Уменьшенная мантисса mB’ = " << m << endl;
+    }
+    string mA = a.m, mB = b.m;
+    size_t n = max(mA.length(), mB.length());
+    mA = string(n - mA.length(), '0') + mA;
+    mB = string(n - mB.length(), '0') + mB;
+
+    int cw = 15;
+    cout << setw(6) << "" << setw(cw) << "mA" << setw(cw) << "-mA"
+        << setw(cw) << "mB'" << setw(cw) << "-mB'" << endl;
+    cout << string(6 + cw * 4, '-') << endl;
+    auto row = [&](const string& name, string(*fn)(const string&, int)) {
+        cout << setw(6) << name
+            << setw(cw) << fn(mA, a.Z) << setw(cw) << fn(mA, 1 - a.Z)
+            << setw(cw) << fn(mB, b.Z) << setw(cw) << fn(mB, 1 - b.Z) << endl;
+        };
+    row("ПК", cP); row("ОК", cO); row("ДК", cD); row("МДК", cM);
+    cout << endl;
+
+    string mdkA = cM(mA, a.Z), mdkB = cM(mB, b.Z);
+    if (mdkA == "не существует" || mdkB == "не существует") {
+        cout << "НЕТ РЕШЕНИЯ" << endl;
+        return;
+    }
+
+    cout << "  " << mdkA << endl;
+    cout << "+ " << mdkB << endl;
+    cout << string(mdkA.length() + 2, '-') << endl;
+    string mdkR = addMDK(mdkA, mdkB);
+    cout << "  " << mdkR << endl << endl;
+
+    int ZR;
+    string mR = mdkToNormal(mdkR, ZR);
+    cout << "mR(МДК) = " << mdkR << endl;
+    if (ZR == 0) {
+        cout << "mR(ПК) = " << cP(mR, 0) << endl;
+    }
+    else {
+        cout << "mR(ДК) = " << cD(mR, 1) << endl;
+        cout << "mR(ОК) = " << cO(mR, 1) << endl;
+        cout << "mR(ПК) = " << cP(mR, 1) << endl;
+    }
+    cout << endl;
+
+    cout << "mR = 0," << trimFrac(mR.substr(2)) << endl;
+
+    string mRn = mR;
+    int IPn = IPR;
+    bool norm = false;
+    if (mRn.length() > 2 && mRn[2] == '0') {
+        size_t fi = mRn.find('1', 2);
+        if (fi != string::npos && fi > 2) {
+            mRn = "0,1" + mRn.substr(fi + 1);
+            IPn -= (int)(fi - 2);
+            norm = true;
+        }
+    }
+    if (norm) cout << "mR(норм) = 0," << trimFrac(mRn.substr(2)) << endl;
+
+    int SPR = IPn + 127;
+    string SPRb = decToBin8(SPR);
+    string fm = mRn.substr(2);
+    while (fm.length() < 23) fm += "0";
+    string R2 = to_string(ZR) + SPRb + fm;
+
+    cout << "ZR = " << ZR << endl;
+    cout << "СПR(2) = " << SPRb << endl;
+    cout << "R(2) = " << R2 << endl;
+    cout << "R = " << binToHex(R2) << endl;
+}
 int main() {
     SetConsoleCP(866);
     SetConsoleOutputCP(866);
@@ -280,25 +462,18 @@ int main() {
         string a, b;
         InputAB(a, b);
 
-        // Ширина для таблицы
-        //int width = max(max(bits(abs(a)), bits(abs(b))), 1);
-
         int k;
         bool opDone = false;
         int step = 2;
         SelectMachineCode(k);
-        string binA = ConvertHex8ToBin(a);
-        string binB = ConvertHex8ToBin(b);
-        int decA = ConvertBinToInt(binA);
-        int decB = ConvertBinToInt(binB);
-        //не робит формула истинного порядка числа
-        int IPA = (int)floor(log2((double)llabs(decA)));
-        int IPB = (int)floor(log2((double)llabs(decB)));
-        cout << "ZA = " << binA[0] << " ИПА = " << IPA << " mA = " << endl;
-        cout << "ZB = " << binB[0] << " ИПB = " << IPB << " mB = " << endl;
+        Hex8 hexA(a);
+        Hex8 hexB(b);
+        cout << "ZA = " << hexA.bin[0] << " ИПА = " << hexA.IP << " mA = 0," << hexA.m << endl;
+        cout << "ZB = " << hexB.bin[0] << " ИПB = " << hexB.IP << " mB = 0," << hexB.m << endl;
         switch (k)
         {
         case 1:
+            Sum(hexA, hexB);
             break;
         case 2:
             cout << "Операция не реализована" << endl;
@@ -311,40 +486,12 @@ int main() {
             break;
         }
         //if (k == 1) {
-        //    PrintTable(a, b, width);
-        //    // Выполняем только деление с восстановлением остатка и сдвигом делителя
-        //    cout << "Деление с восстановлением остатка и сдвигом делителя" << endl;
-        //    int maxSteps = width + 1;
-        //    while (!opDone) {
-
-        //        //divideWithRestore(a, b, step);
-        //        divideMDK(a, b, step);
-
-        //        if (step < maxSteps) {
-        //            if (YesNo("Продолжить деление ?", "Y/N | да/нет ",
-        //                "Ошибка запроса на продолжение деления")) {
-        //                step++;
-        //            }
-        //            else {
-        //                // Пользователь сказал «нет» — пропускаем шаги и сразу ответ
-        //                divideMDK(a, b, maxSteps, true, true);
-        //                opDone = true;
-        //            }
-        //        }
-        //        else {
-        //            // Дошли до максимума — печатаем результат
-        //            divideMDK(a, b, maxSteps, true);
-        //            opDone = true;
-        //        }
-        //    }
+        //    
         //}
         //else {
         //    cout << "Операция не реализована" << endl;
         //}
 
-        // Шаг 6: новые исходные числа?
-        
-        // Шаг 8: завершение программы?
         if (YesNo("Завершить программу?",
             "Y/N | да/нет ",
             "Ошибка запроса на завершение программы")) {
