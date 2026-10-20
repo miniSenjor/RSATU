@@ -404,7 +404,7 @@ void AddSub(Hex8 a, Hex8 b, bool isSub)
     else {
         cout << "mR(ДК) = " << cD(mR, 1) << endl;
         cout << "mR(ОК) = " << cO(mR, 1) << endl;
-        cout << "mR(ПК) = " << cP(mR, 1) << endl;
+        cout << "mR(ПК) = " << cP(mR.substr(2), 1) << endl;
     }
     cout << endl;
 
