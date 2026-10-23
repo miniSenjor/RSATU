@@ -366,9 +366,9 @@ void AddSub(Hex8 a, Hex8 b, bool isSub)
         cout << "Уменьшенная мантисса mB’ = " << m << endl;
     }
     string mA = a.m, mB = b.m;
-    size_t n = max(mA.length(), mB.length());
-    mA = string(n - mA.length(), '0') + mA;
-    mB = string(n - mB.length(), '0') + mB;
+    size_t n = max(a.IP, b.IP);
+    mA = string(n - a.IP, '0') + mA;
+    mB = string(n - b.IP, '0') + mB;
 
     int cw = 15;
     cout << setw(6) << "" << setw(cw) << "mA" << setw(cw) << "-mA"
@@ -385,7 +385,7 @@ void AddSub(Hex8 a, Hex8 b, bool isSub)
     string mdkA = cM(mA, a.Z);
     string mdkB = isSub ? cM(mB, 1 - b.Z) : cM(mB, b.Z);
     if (mdkA == "не существует" || mdkB == "не существует") {
-        cout << "НЕТ РЕШЕНИЯ" << endl;
+        cout << "решения нет" << endl;
         return;
     }
 
@@ -404,7 +404,7 @@ void AddSub(Hex8 a, Hex8 b, bool isSub)
     else {
         cout << "mR(ДК) = " << cD(mR, 1) << endl;
         cout << "mR(ОК) = " << cO(mR, 1) << endl;
-        cout << "mR(ПК) = " << cP(mR.substr(2), 1) << endl;
+        cout << "mR(П) = " << cP(mR.substr(2), 1) << endl;
     }
     cout << endl;
 
@@ -434,6 +434,145 @@ void AddSub(Hex8 a, Hex8 b, bool isSub)
     cout << "R(2) = " << R2 << endl;
     cout << "R = " << binToHex(R2) << endl;
 }
+// "SS.I,FF" -> "SS.FF" (убрать целый бит и запятую) — для таблицы мантисс
+string stripIntBit(const string& s) {
+    if (s == "не существует") return s;
+    size_t dot = s.find('.');
+    if (dot == string::npos) return s;
+    size_t comma = s.find(',', dot);
+    if (comma == string::npos) return s;
+    return s.substr(0, dot + 1) + s.substr(comma + 1);
+}
+
+unsigned long long binToULL(const string& s) {
+    unsigned long long v = 0;
+    for (char c : s) v = v * 2 + (c - '0');
+    return v;
+}
+int bitLength(unsigned long long v) {
+    if (v == 0) return 1;
+    int n = 0;
+    while (v) { n++; v >>= 1; }
+    return n;
+}
+string toBinStr(unsigned long long v, int len) {
+    string s(len, '0');
+    for (int i = len - 1; i >= 0; i--) { s[i] = '0' + (v & 1); v >>= 1; }
+    return s;
+}
+
+void Mult(Hex8 a, Hex8 b) {
+    cout << "Умножение двух чисел A * B" << endl;
+    cout << endl;
+
+    int ZR = a.Z ^ b.Z;
+    cout << "ZR = ZA (+) ZB = " << a.Z << " (+) " << b.Z << " = " << ZR << endl;
+    cout << endl;
+
+    // ---------- 1. Таблица истинных порядков в ПК/ОК/ДК/МДК ----------
+    int maxAbsIP = max(abs(a.IP), abs(b.IP)) + 1;
+    int ipLen = max(1, bitLength((unsigned)maxAbsIP));
+
+    // без tuple: возвращаем через параметры
+    auto makeCodes = [&](int ip, string& pk, string& ok, string& dk, string& mdk) {
+        string bin = toBinStr(abs(ip), ipLen);
+        pk = (ip < 0 ? "1." : "0.") + bin;
+        ok = (ip < 0 ? "1." + inv(bin) : pk);
+        dk = (ip < 0 ? "1." + addOne(inv(bin)) : pk);
+        mdk = (ip < 0 ? "11." + addOne(inv(bin)) : "00." + bin);
+        };
+
+    string aPk, aOk, aDk, aMdk;
+    string bPk, bOk, bDk, bMdk;
+    makeCodes(a.IP, aPk, aOk, aDk, aMdk);
+    makeCodes(b.IP, bPk, bOk, bDk, bMdk);
+
+    int cw = 12;
+    cout << "Таблица истинных порядков:" << endl;
+    cout << setw(6) << "" << setw(cw) << "ИПА" << setw(cw) << "ИПB" << endl;
+    cout << string(6 + cw * 2, '-') << endl;
+    cout << setw(6) << "П" << setw(cw) << aPk << setw(cw) << bPk << endl;
+    cout << setw(6) << "ОК" << setw(cw) << aOk << setw(cw) << bOk << endl;
+    cout << setw(6) << "ДК" << setw(cw) << aDk << setw(cw) << bDk << endl;
+    cout << setw(6) << "МДК" << setw(cw) << aMdk << setw(cw) << bMdk << endl;
+    cout << endl;
+
+    // ---------- 2. Сложение МДК истинных порядков ----------
+    //cout << "Сложение истинных порядков в МДК:" << endl;
+    cout << "  " << aMdk << endl;
+    cout << "+ " << bMdk << endl;
+    cout << string(aMdk.length() + 2, '-') << endl;
+
+    string fullA = aMdk.substr(0, 2) + aMdk.substr(3);
+    string fullB = bMdk.substr(0, 2) + bMdk.substr(3);
+    int n = (int)max(fullA.length(), fullB.length());
+    fullA = string(n - fullA.length(), '0') + fullA;
+    fullB = string(n - fullB.length(), '0') + fullB;
+    string fullR = fullA;
+    int carry = 0;
+    for (int i = n - 1; i >= 0; i--) {
+        int s = (fullA[i] - '0') + (fullB[i] - '0') + carry;
+        fullR[i] = '0' + s % 2;
+        carry = s / 2;
+    }
+    string ipR_MDK = fullR.substr(0, 2) + "." + fullR.substr(2);
+    cout << "  " << ipR_MDK << endl;
+
+    int IPR_val = a.IP + b.IP;
+    cout << "ИПR = " << IPR_val << endl;
+    cout << endl;
+
+    // ---------- 3. Умножение мантисс (без скрытой 1) ----------
+    string mA_bin = "0" + a.m;     // "0,1011" -> "01011"
+    string mB_bin = "0" + b.m;     // "0,11"   -> "011"
+
+    unsigned long long valA = binToULL(mA_bin);
+    unsigned long long valB = binToULL(mB_bin);
+    unsigned long long valR = valA * valB;
+
+    int lenR = (int)mA_bin.length() + (int)mB_bin.length();
+    string mR_bin = toBinStr(valR, lenR);
+
+    //cout << "Умножение мантисс (без скрытой 1):" << endl;
+    cout << "  mA = 0," << a.m << endl;
+    cout << "  mB = 0," << b.m << endl;
+    cout << "  mA * mB = 0," << mR_bin << endl;
+    cout << endl;
+
+    // ---------- 4. Нормализация: пока ведущий бит дроби 0 — сдвиг влево ----------
+    string frac = mR_bin;
+    int shift = 0;
+    while (frac.length() > 1 && frac[0] == '0') {
+        frac = frac.substr(1);
+        shift++;
+    }
+    //IPR_val -= shift;
+    if (shift > 0) {
+        /*cout << "Нормализация: сдвиг влево на " << shift
+            << ", ИПR = " << IPR_val << endl;*/
+        cout << "  mR(норм) = 0," << frac << endl;
+        cout << endl;
+    }
+
+    cout << "mR = " << (ZR ? "-" : "") << "0," << trimFrac(frac) << endl;
+    cout << endl;
+
+    // ---------- 5. Упаковка в IEEE 754 ----------
+    int SPR = IPR_val + 127;
+    if (SPR < 0)   SPR = 0;
+    if (SPR > 255) SPR = 255;
+    string SPRb = decToBin8(SPR);
+
+    string fm = frac;
+    while ((int)fm.length() < 23) fm += "0";
+    if ((int)fm.length() > 23) fm = fm.substr(0, 23);
+    string R2 = to_string(ZR) + SPRb + fm;
+
+    cout << "ZR = " << ZR << endl;
+    cout << "СПR(2) = " << SPRb << endl;
+    cout << "R(2) = " << R2 << endl;
+    cout << "R = " << binToHex(R2) << endl;
+}
 int main() {
     SetConsoleCP(866);
     SetConsoleOutputCP(866);
@@ -443,8 +582,13 @@ int main() {
         string a, b;
         InputAB(a, b);
 
-        int k;
-        SelectMachineCode(k);
+        int k = 0;
+        while (k != 3)
+        {
+            SelectMachineCode(k);
+            if (k!=3)
+                cout << "Операция не реализована" << endl;
+        }
         Hex8 hexA(a);
         Hex8 hexB(b);
         cout << "ZA = " << hexA.bin[0] << " ИПА = " << hexA.IP << " mA = 0," << hexA.m << endl;
@@ -459,7 +603,7 @@ int main() {
             //cout << "Операция не реализована" << endl;
             break;
         case 3:
-            cout << "Операция не реализована" << endl;
+            Mult(hexA, hexB);
             break;
         case 4:
             cout << "Операция не реализована" << endl;

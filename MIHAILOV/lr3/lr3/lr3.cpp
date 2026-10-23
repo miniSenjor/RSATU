@@ -1,4 +1,4 @@
-п»ї//РІС‚РѕСЂРѕР№ РјРµС‚РѕРґ РґРµР»РµРЅРёСЏ СЃ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµРј РѕСЃС‚Р°С‚РєР° Рё СЃРґРІРёРіРѕРј РґРµР»РёС‚РµР»СЏ
+//второй метод деления с восстановлением остатка и сдвигом делителя
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -9,7 +9,7 @@
 #include <vector>
 using namespace std;
 
-// Р§С‚РµРЅРёРµ С†РµР»РѕРіРѕ С‡РёСЃР»Р° РёР· СЃС‚СЂРѕРєРё
+// Чтение целого числа из строки
 bool ReadInt(int& value) {
     string s;
     if (!getline(cin, s)) return false;
@@ -20,57 +20,57 @@ bool ReadInt(int& value) {
     return ss.eof();
 }
 
-// Р’РІРѕРґ A Рё B
+// Ввод A и B
 void InputAB(int& a, int& b) {
     bool isANum = false, isBNum = false;
     while (!isANum || !isBNum || abs(a) >= abs(b)) {
         a = b = 0;
-        cout << "Р’РІРµРґРёС‚Рµ РґРІР° С†РµР»С‹С… РґРµСЃСЏС‚РёС‡РЅС‹С… С‡РёСЃР»Р° |A| < |B|:" << endl;
+        cout << "Введите два целых десятичных числа |A| < |B|:" << endl;
         cout << "A = ";
         isANum = ReadInt(a);
         cout << "B = ";
         isBNum = ReadInt(b);
         if (!isANum || !isBNum || abs(a) >= abs(b))
-            cout << "РћС€РёР±РєР° РІРІРѕРґР° РёСЃС…РѕРґРЅС‹С… С‡РёСЃРµР»" << endl;
+            cout << "Ошибка ввода исходных чисел" << endl;
     }
 }
 
-// Р’С‹Р±РѕСЂ РЅРѕРјРµСЂР° РѕРїРµСЂР°С†РёРё
+// Выбор номера операции
 void SelectMachineCode(int& k) {
     k = 0;
     bool ok = false;
     while (!ok) {
-        cout << "Р’РІРµРґРёС‚Рµ РЅРѕРјРµСЂ СЃРїРѕСЃРѕР±Р° РґРµР»РµРЅРёСЏ, РєРѕС‚РѕСЂС‹Р№ РЅРµРѕР±С…РѕРґРёРјРѕ СЂРµР°Р»РёР·РѕРІР°С‚СЊ:" << endl;
-        cout << "1 СЃ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµРј РѕСЃС‚Р°С‚РєР° Рё СЃРґРІРёРіРѕРј РѕСЃС‚Р°С‚РєР°" << endl;
-        cout << "2 СЃ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµРј РѕСЃС‚Р°С‚РєР° Рё СЃРґРІРёРіРѕРј РґРµР»РёС‚РµР»СЏ" << endl;
-        cout << "3 Р±РµР· РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РѕСЃС‚Р°С‚РєР° Рё СЃРґРІРёРіРѕРј РѕСЃС‚Р°С‚РєР°" << endl;
-        cout << "4 Р±РµР· РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РѕСЃС‚Р°С‚РєР° Рё СЃРґРІРёРіРѕРј РґРµР»РёС‚РµР»СЏ" << endl;
+        cout << "Введите номер способа деления, который необходимо реализовать:" << endl;
+        cout << "1 с восстановлением остатка и сдвигом остатка" << endl;
+        cout << "2 с восстановлением остатка и сдвигом делителя" << endl;
+        cout << "3 без восстановления остатка и сдвигом остатка" << endl;
+        cout << "4 без восстановления остатка и сдвигом делителя" << endl;
         cout << "K = ";
         if (ReadInt(k)) {
             ok = (k >= 1 && k <= 4);
         }
         if (!ok) {
-            cout << "РћС€РёР±РєР° РІРІРѕРґР° РЅРѕРјРµСЂР° СЃРїРѕСЃРѕР±Р° РґРµР»РµРЅРёСЏ" << endl;
+            cout << "Ошибка ввода номера способа деления" << endl;
         }
     }
 }
 
-// Р—Р°РїСЂРѕСЃ Р”Р°/РќРµС‚
+// Запрос Да/Нет
 bool YesNo(const string& q, const string& yn, const string& er) {
     while (true) {
         cout << q << endl;
         cout << yn;
         string s;
         getline(cin, s);
-        if (s == "Y" || s == "РґР°")
+        if (s == "Y" || s == "да")
             return true;
-        if (s == "N" || s == "РЅРµС‚")
+        if (s == "N" || s == "нет")
             return false;
         cout << er << endl;
     }
 }
 
-// РљРѕР»РёС‡РµСЃС‚РІРѕ Р±РёС‚ РґР»СЏ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ РјРѕРґСѓР»СЏ С‡РёСЃР»Р°
+// Количество бит для представления модуля числа
 int bits(int x) {
     x = abs(x);
     if (x == 0) return 1;
@@ -82,7 +82,7 @@ int bits(int x) {
     return count;
 }
 
-// Р”РІРѕРёС‡РЅРѕРµ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРµ С‡РёСЃР»Р° v РІ РїРѕР»Рµ width Р±РёС‚
+// Двоичное представление числа v в поле width бит
 string ToBinary(int v, int width) {
     string s(width, '0');
     for (int i = 0; i < width; ++i) {
@@ -92,13 +92,13 @@ string ToBinary(int v, int width) {
     return s;
 }
 
-// РџСЂСЏРјРѕР№ РєРѕРґ СЃ Р·Р°РґР°РЅРЅРѕР№ С€РёСЂРёРЅРѕР№
+// Прямой код с заданной шириной
 string ToDirectCodeW(int v, int width) {
     string mag = ToBinary(abs(v), width);
     return (v < 0 ? "1." : "0.") + mag;
 }
 
-// РћР±СЂР°С‚РЅС‹Р№ РєРѕРґ СЃ Р·Р°РґР°РЅРЅРѕР№ С€РёСЂРёРЅРѕР№
+// Обратный код с заданной шириной
 string ToRevCodeW(int v, int width) {
     if (v >= 0) return ToDirectCodeW(v, width);
     string mag = ToBinary(abs(v), width);
@@ -106,7 +106,7 @@ string ToRevCodeW(int v, int width) {
     return "1." + mag;
 }
 
-// Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Р№ РєРѕРґ СЃ Р·Р°РґР°РЅРЅРѕР№ С€РёСЂРёРЅРѕР№
+// Дополнительный код с заданной шириной
 string ToDopCodeW(int v, int width) {
     if (v >= 0) return ToDirectCodeW(v, width);
     int magVal = (1 << width) - abs(v);
@@ -114,7 +114,7 @@ string ToDopCodeW(int v, int width) {
     return "1." + mag;
 }
 
-// РњРѕРґРёС„РёС†РёСЂРѕРІР°РЅРЅС‹Р№ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Р№ РєРѕРґ СЃ Р·Р°РґР°РЅРЅРѕР№ С€РёСЂРёРЅРѕР№
+// Модифицированный дополнительный код с заданной шириной
 string ToModCodeW(int v, int width) {
     if (v >= 0) return "00." + ToBinary(abs(v), width);
     int magVal = (1 << width) - abs(v);
@@ -122,7 +122,7 @@ string ToModCodeW(int v, int width) {
     return "11." + mag;
 }
 
-// РџСЂСЏРјРѕР№ РєРѕРґ Р±РµР· Р·РЅР°РєР° (РґР»СЏ РІС‹РІРѕРґР° A(2), B(2), R(2))
+// Прямой код без знака (для вывода A(2), B(2), R(2))
 string ToDirectCode(int v, bool hasAddSign) {
     string ans;
     int absV = std::abs(v);
@@ -138,7 +138,7 @@ string ToDirectCode(int v, bool hasAddSign) {
     return ans;
 }
 
-// РўР°Р±Р»РёС†Р° РєРѕРґРѕРІ РґР»СЏ A Рё B
+// Таблица кодов для A и B
 void PrintTable(int a, int b, int width) {
     cout << "A(2) = ";
     cout << ToDirectCode(a, false) << endl;
@@ -177,25 +177,25 @@ void PrintTable(int a, int b, int width) {
         << setw(colw) << "-|B(2)|" << endl;
     cout << string(colw * 4 + 4, '-') << endl;
 
-    cout << "Рџ   "
+    cout << "П   "
         << setw(colw) << ToDirectCodeW(absA, width)
         << setw(colw) << ToDirectCodeW(absB, width)
         << setw(colw) << ToDirectCodeW(-absB, width) << endl;
     cout << string(colw * 4 + 4, '-') << endl;
 
-    cout << "РћРљ  "
+    cout << "ОК  "
         << setw(colw) << ToRevCodeW(absA, width)
         << setw(colw) << ToRevCodeW(absB, width)
         << setw(colw) << ToRevCodeW(-absB, width) << endl;
     cout << string(colw * 4 + 4, '-') << endl;
 
-    cout << "Р”Рљ  "
+    cout << "ДК  "
         << setw(colw) << ToDopCodeW(absA, width)
         << setw(colw) << ToDopCodeW(absB, width)
         << setw(colw) << ToDopCodeW(-absB, width) << endl;
     cout << string(colw * 4 + 4, '-') << endl;
 
-    cout << "РњР”Рљ "
+    cout << "МДК "
         << setw(colw) << ToModCodeW(absA, width)
         << setw(colw) << ToModCodeW(absB, width)
         << setw(colw) << ToModCodeW(-absB, width) << endl;
@@ -205,7 +205,7 @@ void PrintTable(int a, int b, int width) {
 
 
 
-// Р”РІРѕРёС‡РЅРѕРµ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёРµ С‡РёСЃР»Р° v РІ РїРѕР»Рµ width Р±РёС‚
+// Двоичное представление числа v в поле width бит
 string toBin(long long v, int width) {
     string s(width, '0');
     for (int i = 0; i < width; i++) {
@@ -214,7 +214,7 @@ string toBin(long long v, int width) {
     return s;
 }
 
-// Р¤РѕСЂРјР°С‚ "s.xxxxx" вЂ” Р·РЅР°Рє, С‚РѕС‡РєР°, РґРІРѕРёС‡РЅС‹Рµ СЂР°Р·СЂСЏРґС‹
+// Формат "s.xxxxx" — знак, точка, двоичные разряды
 string fmt(long long v, int width) {
     string sign = (v < 0) ? "1" : "0";
     return sign + "." + toBin(llabs(v), width);
@@ -222,11 +222,11 @@ string fmt(long long v, int width) {
 
 string toMDK(long long v, int width) {
     long long mod = 1LL << width;
-    long long mag = ((v % mod) + mod) % mod;   // РјРѕРґСѓР»СЊ РІ field width
+    long long mag = ((v % mod) + mod) % mod;   // модуль в field width
     string sign = (v < 0) ? "11" : "00";
     return sign + "." + toBin(mag, width);
 }
-void divideMDK(long long A, long long B, int steps, bool onlyResult = false, bool skip = false) {
+void divideMDK(long long A, long long B, int steps, bool onlyResult = false, bool skip = false, int maxStep = 0) {
     long long absA = llabs(A);
     long long absB = llabs(B);
 
@@ -259,7 +259,7 @@ void divideMDK(long long A, long long B, int steps, bool onlyResult = false, boo
         if (Rnew < 0) {
             bit = 0;
             if (!onlyResult && i + 1 < steps)
-                cout << "  " << toMDK(R, width) << " Р’Рћ" << endl;
+                cout << "  " << toMDK(R, width) << " ВО" << endl;
         }
         else {
             bit = 1;
@@ -273,17 +273,26 @@ void divideMDK(long long A, long long B, int steps, bool onlyResult = false, boo
                 cout << "  " << toMDK(Bshift, width) << " <-" << endl;
         }
     }
+    if (!onlyResult && steps <= maxStep)
+    {
+        cout << "|R(2)|=0,";
+        for (int i=1; i<qbits.size(); i++)
+            cout << qbits[i];
+        cout << endl;
+    }
+
 
     if (onlyResult) {
-        // qbits[0] вЂ” С†РµР»Р°СЏ С‡Р°СЃС‚СЊ, qbits[1..] вЂ” РґСЂРѕР±РЅС‹Рµ Р±РёС‚С‹
+        // qbits[0] — целая часть, qbits[1..] — дробные биты
         vector<int> frac(qbits.begin() + 1, qbits.end());
 
-        // РћС‚Р±СЂР°СЃС‹РІР°РµРј РїРѕСЃР»РµРґРЅРёР№ (Р·Р°С‰РёС‚РЅС‹Р№) Р±РёС‚ СЃ РѕРєСЂСѓРіР»РµРЅРёРµРј
-        if (!frac.empty()) {
+        // Отбрасываем последний (защитный) бит с округлением
+        //возможен баг при прерывании делении
+        if (!frac.empty() && skip) {
             int guard = frac.back();
-            frac.pop_back();
+            //frac.pop_back();
             if (guard == 1) {
-                // РџСЂРёР±Р°РІР»СЏРµРј 1 Рє РјР»Р°РґС€РµРјСѓ СЂР°Р·СЂСЏРґСѓ СЃ РїРµСЂРµРЅРѕСЃРѕРј
+                // Прибавляем 1 к младшему разряду с переносом
                 int i = (int)frac.size() - 1;
                 while (i >= 0 && frac[i] == 1) {
                     frac[i] = 0;
@@ -291,30 +300,48 @@ void divideMDK(long long A, long long B, int steps, bool onlyResult = false, boo
                 }
                 if (i >= 0)
                     frac[i] = 1;
-                // РїСЂРё РїРµСЂРµРїРѕР»РЅРµРЅРёРё С‡РµСЂРµР· РІСЃСЋ РґСЂРѕР±СЊ вЂ” С†РµР»Р°СЏ С‡Р°СЃС‚СЊ РЅРµ РјРµРЅСЏРµС‚СЃСЏ,
-                // С‚.Рє. |A| < |B| Рё С†РµР»Р°СЏ С‡Р°СЃС‚СЊ РІСЃРµРіРґР° 0
+                // при переполнении через всю дробь — целая часть не меняется,
+                // т.к. |A| < |B| и целая часть всегда 0
             }
         }
 
-        // РЎР±РѕСЂРєР° СЃС‚СЂРѕРєРё СЂРµР·СѓР»СЊС‚Р°С‚Р°
-        string qstr = "0.";
+        // Сборка строки результата
+        string qstr = "0,";
         if (frac.empty())
             qstr = "0";
         for (int b : frac)
             qstr += to_string(b);
 
-        // Р—РЅР°С‡РµРЅРёРµ С‡Р°СЃС‚РЅРѕРіРѕ РєР°Рє РґСЂРѕР±СЊ
+        // Значение частного как дробь
         double qval = 0;
         for (size_t i = 0; i < frac.size(); i++)
             qval += frac[i] * (1.0 / (1LL << (i + 1)));
         if (negQ) qval = -qval;
         
+        string withOutZero = "";
+        bool isZero = true;
+        for (int i = qstr.length() - 1; i >= 0; i--)
+        {
+            if (qstr == "0,0")
+            {
+                withOutZero = qstr;
+                break;
+            }
+            if ((isZero && qstr[i] == '1') || !isZero)
+            {
+                isZero = false;
+                withOutZero = qstr[i] + withOutZero;
+            }
+            else
+                continue;
+        }
+
         if (skip)
-            cout << "|R(2)|РѕРєСЂ = ";
+            cout << "|R(2)|окр = ";
         else
             cout << "|R(2)| = ";
         cout << qstr << endl;
-        cout << "R(2) = " << (negQ ? "-" : "") << qstr << endl;
+        cout << "R(2) = " << (negQ ? "-" : "") << withOutZero << endl;
         cout << "R(10) = " << qval << endl;
         cout << endl;
     }
@@ -324,61 +351,60 @@ int main() {
     SetConsoleCP(866);
     SetConsoleOutputCP(866);
 
-    SetConsoleOutputCP(1251);
+    //SetConsoleOutputCP(1251);
     while (true) {
         int a, b;
         InputAB(a, b);
 
-        // РЁРёСЂРёРЅР° РґР»СЏ С‚Р°Р±Р»РёС†С‹
+        // Ширина для таблицы
         int width = max(max(bits(abs(a)), bits(abs(b))), 1);
 
-        int k;
+        int k = 0;
         bool opDone = false;
         int step = 2;
-        SelectMachineCode(k);
-        if (k == 2) {
-            PrintTable(a, b, width);
-            // Р’С‹РїРѕР»РЅСЏРµРј С‚РѕР»СЊРєРѕ РґРµР»РµРЅРёРµ СЃ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµРј РѕСЃС‚Р°С‚РєР° Рё СЃРґРІРёРіРѕРј РґРµР»РёС‚РµР»СЏ
-            cout << "Р”РµР»РµРЅРёРµ СЃ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµРј РѕСЃС‚Р°С‚РєР° Рё СЃРґРІРёРіРѕРј РґРµР»РёС‚РµР»СЏ" << endl;
-            int maxSteps = width + 1;
-            while (!opDone) {
+        while (k != 2)
+        {
+            SelectMachineCode(k);
+            if (k!=2)
+                cout << "Операция не реализована" << endl;
+        }
+        PrintTable(a, b, width);
+        // Выполняем только деление с восстановлением остатка и сдвигом делителя
+        cout << "Деление с восстановлением остатка и сдвигом делителя" << endl;
+        int maxSteps = width + 1;
 
-                //divideWithRestore(a, b, step);
-                divideMDK(a, b, step);
-                
-                if (step < maxSteps) {
-                    if (YesNo("РџСЂРѕРґРѕР»Р¶РёС‚СЊ РґРµР»РµРЅРёРµ ?", "Y/N | РґР°/РЅРµС‚ ",
-                        "РћС€РёР±РєР° Р·Р°РїСЂРѕСЃР° РЅР° РїСЂРѕРґРѕР»Р¶РµРЅРёРµ РґРµР»РµРЅРёСЏ")) {
-                        step++;
-                    }
-                    else {
-                        // РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃРєР°Р·Р°Р» В«РЅРµС‚В» вЂ” РїСЂРѕРїСѓСЃРєР°РµРј С€Р°РіРё Рё СЃСЂР°Р·Сѓ РѕС‚РІРµС‚
-                        divideMDK(a, b, maxSteps, true, true);
-                        opDone = true;
-                    }
+        while (!opDone) {
+            //divideWithRestore(a, b, step);
+            divideMDK(a, b, step, false, false, maxSteps);
+
+            if (step <= maxSteps) {
+                if (YesNo("Продолжить деление ?", "Y/N | да/нет ",
+                    "Ошибка запроса на продолжение деления")) {
+                    step++;
                 }
                 else {
-                    // Р”РѕС€Р»Рё РґРѕ РјР°РєСЃРёРјСѓРјР° вЂ” РїРµС‡Р°С‚Р°РµРј СЂРµР·СѓР»СЊС‚Р°С‚
-                    divideMDK(a, b, maxSteps, true);
+                    // Пользователь сказал «нет» — пропускаем шаги и сразу ответ
+                    divideMDK(a, b, step, true, false);
                     opDone = true;
                 }
             }
+            else {
+                // Дошли до максимума — печатаем результат
+                divideMDK(a, b, maxSteps, true, true);
+                opDone = true;
+            }
         }
-        else {
-            cout << "РћРїРµСЂР°С†РёСЏ РЅРµ СЂРµР°Р»РёР·РѕРІР°РЅР°" << endl;
-        }
-
-        // РЁР°Рі 6: РЅРѕРІС‹Рµ РёСЃС…РѕРґРЅС‹Рµ С‡РёСЃР»Р°?
-        if (YesNo("Р’РІРµСЃС‚Рё РЅРѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РёСЃС…РѕРґРЅС‹С… С‡РёСЃРµР»?",
-            "Y/N | РґР°/РЅРµС‚ ",
-            "РћС€РёР±РєР° Р·Р°РїСЂРѕСЃР° РЅР° РІРІРѕРґ РЅРѕРІС‹С… Р·РЅР°С‡РµРЅРёР№ РёСЃС…РѕРґРЅС‹С… С‡РёСЃРµР»")) {
+        // Шаг 6: новые исходные числа?
+        if (YesNo("Ввести новые значения исходных чисел?",
+            "Y/N | да/нет ",
+            "Ошибка запроса на ввод новых значений исходных чисел")) {
             continue;
         }
         else {
-            // РЁР°Рі 8: Р·Р°РІРµСЂС€РµРЅРёРµ РїСЂРѕРіСЂР°РјРјС‹?
-            if (YesNo("Р—Р°РІРµСЂС€РёС‚СЊ РїСЂРѕРіСЂР°РјРјСѓ?",
-                "Y/N | РґР°/РЅРµС‚ ",
-                "РћС€РёР±РєР° Р·Р°РїСЂРѕСЃР° РЅР° Р·Р°РІРµСЂС€РµРЅРёРµ РїСЂРѕРіСЂР°РјРјС‹")) {
+            // Шаг 8: завершение программы?
+            if (YesNo("Завершить программу?",
+                "Y/N | да/нет ",
+                "Ошибка запроса на завершение программы")) {
                 break;
             }
             else {
