@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Runtime.ConstrainedExecution;
+using System.Xml;
 
 namespace lr5cs
 {
@@ -15,36 +16,30 @@ namespace lr5cs
     }
     internal class Program
     {
-        static void Main(string[] args)
+        static int Input(string s)
         {
-            Console.WriteLine("Ввод списка");
-            Node cur = new Node(0), next, head = cur;
-            bool isAdd = true;
-            while(isAdd)
+            int v;
+            while (true)
             {
-                int v;
-                while(true)
-                {
-                    Console.Write("Введите значение ");
-                    if (int.TryParse(Console.ReadLine(), out v))
-                    {
-                        cur.Value = v;
-                        break;
-                    }
-                    else
-                        Console.WriteLine("Не распознанное число");
+                Console.WriteLine(s);
+                if (int.TryParse(Console.ReadLine(), out v))
+                    break;
+                else
+                    Console.WriteLine("Не распознанное число");
 
-                }
-                int c;
-                while(true)
-                {
-                    Console.WriteLine("0 - выход 1 - добавить элемент 2 - добавить цикл");
-                    if(int.TryParse(Console.ReadLine(), out c))
-                        break;
-                    else
-                        Console.WriteLine("Не распознанное число");
-                }
-                switch(c)
+            }
+            return v;
+        }
+
+        static void Add(Node cur, Node next, Node head)
+        {
+            bool isAdd = true;
+            while (isAdd)
+            {
+                int v = Input("Введите значение");
+                cur.Value = v;
+                int c = Input("0 - выход 1 - добавить элемент 2 - добавить цикл");
+                switch (c)
                 {
                     case 0:
                         isAdd = false;
@@ -56,13 +51,13 @@ namespace lr5cs
                         break;
                     case 2:
                         int n;
-                        while(true)
+                        while (true)
                         {
                             Console.Write("Введите номер с которым соединить элемент - ");
-                            if(!int.TryParse(Console.ReadLine(),out n))
+                            if (int.TryParse(Console.ReadLine(), out n))
                             {
                                 Node node = head;
-                                while(node != null && node.Value != n)
+                                while (node != null && node.Value != n)
                                 {
                                     node = node.Next;
                                 }
@@ -71,7 +66,7 @@ namespace lr5cs
                                     Console.WriteLine("Не найден элемент с введенным номером");
                                     continue;
                                 }
-                                if(node.Value == n)
+                                if (node.Value == n)
                                 {
                                     cur.Next = node;
                                     break;
@@ -84,16 +79,16 @@ namespace lr5cs
                         break;
                 }
             }
-            int p;
-            while (true)
-            {
-                Console.WriteLine("Выберите способ проверки списка");
-                Console.WriteLine("1 - простой перебор 2 - два указателя 3 - реверс списка");
-                if (int.TryParse(Console.ReadLine(), out p))
-                    break;
-                else
-                    Console.WriteLine("Не распознанное число");
-            }
+        }
+
+        
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Ввод списка");
+            Node cur = new Node(0), next = null, head = cur;
+            //Add(cur, next, head);
+            int p = Input("Выберите способ проверки списка\r\n1 - простой перебор 2 - два указателя 3 - реверс списка");
             bool hasCycle = false;
             switch(p)
             {
