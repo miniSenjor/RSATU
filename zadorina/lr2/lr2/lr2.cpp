@@ -1,135 +1,81 @@
 ﻿#include <iostream>
+#include <fstream>
 #include <vector>
-#include <windows.h>
-#include "Matrix.h"
-
+#include <string>
+#include "TPerson.h"
+#include "Worker.h"
+#include "Student.h"
+#include "TSpisok.h"
 using namespace std;
-
-void InputMatrix(int n, int m, Matrix& a, Matrix& b)
-{
-    cout << "Введите матрицу A" << endl;
-    a = *(new Matrix(n, m));
-    a.ReadMas();
-    cout << "Введите матрицу B" << endl;
-    a = *(new Matrix(n, m));
-    b.ReadMas();
-}
-
-void InputNM(int& n, int& m, Matrix &a, Matrix &b)
-{
-    cout << "Введите размеры массива";
-    cout << "n = ";
-    cin >> n;
-    cout << "m = ";
-    cin >> m;
-    InputMatrix(n, m, a, b);
-}
 
 int main()
 {
-    SetConsoleOutputCP(1251);
-    int n = 0, m = 0;
-    Matrix a(0, 0);
-    Matrix b(0, 0);
-    bool hasInputNM = false;
-    while (true)
+    setlocale(LC_ALL, "ru");
+    string filename;
+    cout << "Введите имя файла: ";
+    cin >> filename;
+
+    TSpisok spisok(filename);
+    spisok.LoadFromFile();
+    cout << "Загруженные данные:" << endl;
+    spisok.PrintAll();
+
+    bool isExit = false;
+    while (!isExit)
     {
-        cout << "Выберите команду" << endl;
-        cout << "1 ввод размера матрицы " << endl;
-        cout << "2 ввод матрицы " << endl;
-        cout << "3 A + B " << endl;
-        cout << "4 A + число " << endl;
-        cout << "5 A * B " << endl;
-        cout << "6 A * число " << endl;
-        cout << "7 A++ " << endl;
-        cout << "0 выход " << endl;
         int com;
+        cout << "\nВыберите команду:" << endl;
+        cout << "1 - добавить человека" << endl;
+        cout << "2 - добавить студента" << endl;
+        cout << "3 - добавить работника" << endl;
+        cout << "4 - вывести список" << endl;
+        cout << "5 - сохранить в файл" << endl;
+        cout << "0 - выход" << endl;
         cin >> com;
+
+        if (com == 0) { isExit = true; continue; }
+
+        if (com == 4) { spisok.PrintAll(); continue; }
+        if (com == 5) { spisok.SaveToFile(); cout << "Сохранено." << endl; continue; }
+
+        string f, s, t;
+        cout << "Введите фамилию: "; cin >> f;
+        cout << "Введите имя: "; cin >> s;
+        cout << "Введите отчество: "; cin >> t;
+
         switch (com)
         {
         case 1:
-            cout << "Ввод размера матрицы" << endl;
-            InputNM(n, m, a, b);
-            hasInputNM = true;
+        {
+            spisok.AddPerson(make_unique<TPerson>(f, s, t));
+            cout << "Человек добавлен." << endl;
             break;
+        }
         case 2:
-            if (!hasInputNM)
-            {
-                cout << "Не введен размер матриц";
-                break;
-            }
-            cout << "Ввод матриц" << endl;
-            InputMatrix(n, m, a, b);
+        {
+            int course;
+            string group;
+            cout << "Введите курс: "; cin >> course;
+            cout << "Введите группу: "; cin >> group;
+            spisok.AddPerson(make_unique<Student>(f, s, t, course, group));
+            cout << "Студент добавлен." << endl;
             break;
+        }
         case 3:
         {
-            if (!hasInputNM)
-            {
-                cout << "Не введены матрицы";
-                break;
-            }
-            cout << "A + B" << endl;
-            Matrix res = a + b;
-            res.WriteMas();
-        }
-        break;
-        case 4:
-        {
-            if (!hasInputNM)
-            {
-                cout << "Не введены матрицы";
-                break;
-            }
-            cout << "A + x" << endl;
-            cout << "Введите число ";
-            int x;
-            cin >> x;
-            Matrix res = a + x;
-            res.WriteMas();
-        }
-        break;
-        case 5:
-        {
-            if (!hasInputNM)
-            {
-                cout << "Не введены матрицы";
-                break;
-            }
-            cout << "A * B" << endl;
-            Matrix res = a * b;
-            res.WriteMas();
-        }
-        break;
-        case 6:
-        {
-            if (!hasInputNM)
-            {
-                cout << "Не введены матрицы";
-                break;
-            }
-            cout << "A * x" << endl;
-            cout << "Введите число ";
-            int x;
-            cin >> x;
-            Matrix res = a * x;
-            res.WriteMas();
-        }
-        break;
-        case 7:
-        {
-            if (!hasInputNM)
-            {
-                cout << "Не введены матрицы";
-                break;
-            }
-            cout << "A++" << endl;
-            Matrix res = ++a;
-            res.WriteMas();
-        }
+            int tabel;
+            cout << "Введите табельный номер: "; cin >> tabel;
+            spisok.AddPerson(make_unique<Worker>(f, s, t, tabel));
+            cout << "Работник добавлен." << endl;
             break;
-        case 10:
-            return 0;
+        }
+        default:
+            cout << "Неизвестная команда" << endl;
+            break;
         }
     }
-    return 0;
+
+    // Сохраняем всё при выходе
+    spisok.SaveToFile();
+
 }

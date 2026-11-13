@@ -2,16 +2,21 @@
 #include <stdexcept>
 #include <iostream>
 
-
-Matrix::Matrix(int a, int b) {
-    n = a;m = b;
+Matrix::Matrix() {
+    n = 0; m = 0;
     mas = new float* [n];
-    for (int i = 0;i < n;i++)
+    for (int i = 0; i < n; i++)
+        mas[i] = new float[m];
+}
+Matrix::Matrix(int a, int b) {
+    n = a; m = b;
+    mas = new float* [n];
+    for (int i = 0; i < n; i++)
         mas[i] = new float[m];
 }
 Matrix::~Matrix()
 {
-    for (int i = 0;i < n;i++)
+    for (int i = 0; i < n; i++)
         delete[] mas[i];
     delete[]mas;
 }
@@ -19,20 +24,19 @@ Matrix::~Matrix()
 void Matrix::operator=(Matrix& m2)
 {
     if (n == m2.n && m == m2.m)
-        for (int i = 0;i < n;i++)
-            for (int j = 0;j < m;j++)
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
                 mas[i][j] = m2.mas[i][j];
     else throw std::invalid_argument("Не совпадают размеры массивов");
-
 }
 
 bool operator==(Matrix& l, Matrix& r)
 {
     if (l.n != r.n || l.m != r.m)
-        throw std::invalid_argument("Не совпадают размеры массивов");
+        throw "Не совпадают размеры массивов";
 
-    for (int i = 0;i < l.n;i++)
-        for (int j = 0;j < l.m;j++)
+    for (int i = 0; i < l.n; i++)
+        for (int j = 0; j < l.m; j++)
             if (l.mas[i][j] != r.mas[i][j])
                 return false;
     return true;
@@ -40,7 +44,7 @@ bool operator==(Matrix& l, Matrix& r)
 
 Matrix operator+(const Matrix& l, const Matrix& r) {
     if (l.n != r.n || l.m != r.m)
-        throw std::invalid_argument("Не совпадают размеры массивов");
+        throw "Не совпадают размеры массивов";
     Matrix m(l.n, l.m);
     for (int i = 0; i < m.n; i++)
         for (int j = 0; j < m.m; j++)
@@ -73,11 +77,11 @@ Matrix operator*(const Matrix& l, const Matrix& r)
 
     Matrix tmp(l.n, r.m);
     float s;
-    for (int i = 0;i < l.n;i++)
-        for (int j = 0;j < r.m;j++)
+    for (int i = 0; i < l.n; i++)
+        for (int j = 0; j < r.m; j++)
         {
             s = 0;
-            for (int k = 0;k < l.m;k++)
+            for (int k = 0; k < l.m; k++)
                 s += l.mas[i][k] * r.mas[k][j];
             tmp.mas[i][j] = s;
         }
@@ -88,20 +92,23 @@ Matrix operator*(const Matrix& l, int x)
 {
     Matrix tmp(l.n, l.m);
     int s;
-    for (int i = 0;i < l.n;i++)
-        for (int j = 0;j < l.m;j++)
+    for (int i = 0; i < l.n; i++)
+        for (int j = 0; j < l.m; j++)
             tmp.mas[i][j] = l.mas[i][j] * x;
     return tmp;
 }
 
-Matrix operator++(Matrix& l)
+void operator++(Matrix& l)
 {
     Matrix tmp(l.m, l.n);
     for (int i = 0; i < l.n; i++)
         for (int j = 0; j < l.m; j++)
             tmp.mas[j][i] = l.mas[i][j];
-    
-    return tmp;
+
+    std::swap(l.n, tmp.n);
+    std::swap(l.m, tmp.m);
+    std::swap(l.mas, tmp.mas);
+    //return tmp;
 }
 
 void Matrix::ReadMas()
@@ -110,6 +117,7 @@ void Matrix::ReadMas()
     for (int i = 0; i < n; i++)
         for (int j = 0; j < m; j++)
             std::cin >> mas[i][j];
+    WriteMas();
 }
 
 void Matrix::WriteMas()

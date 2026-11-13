@@ -5,6 +5,7 @@ private:
     float** mas;
     int n, m;
 public:
+    Matrix();
     Matrix(int a, int b);
     ~Matrix();
 
@@ -21,8 +22,8 @@ public:
     friend Matrix operator*(const Matrix& l, const Matrix& r);
 
     friend Matrix operator*(const Matrix& l, int x);
-    
-    friend Matrix operator++(Matrix& l);
+
+    friend void operator++(Matrix& l);
 
     void ReadMas();
     void WriteMas();
