@@ -27,7 +27,7 @@ void Matrix::operator=(Matrix& m2)
         for (int i = 0; i < n; i++)
             for (int j = 0; j < m; j++)
                 mas[i][j] = m2.mas[i][j];
-    else throw std::invalid_argument("Не совпадают размеры массивов");
+    else throw "Не совпадают размеры массивов";
 }
 
 bool operator==(Matrix& l, Matrix& r)
@@ -62,7 +62,7 @@ Matrix operator+(const Matrix& l, int x) {
 
 Matrix operator-(const Matrix& l, const Matrix& r) {
     if (l.n != r.n || l.m != r.m)
-        throw std::invalid_argument("Не совпадают размеры массивов");
+        throw "Не совпадают размеры массивов";
     Matrix m(l.n, l.m);
     for (int i = 0; i < m.n; i++)
         for (int j = 0; j < m.m; j++)
@@ -73,7 +73,7 @@ Matrix operator-(const Matrix& l, const Matrix& r) {
 Matrix operator*(const Matrix& l, const Matrix& r)
 {
     if (l.m != r.n)
-        throw std::invalid_argument("Не совпадают размеры массивов");
+        throw "Не совпадают размеры массивов";
 
     Matrix tmp(l.n, r.m);
     float s;
