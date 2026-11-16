@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <queue>
 #include <set>
-
+/*Топологическая сортировка Алгоритм Вирта*/
 using namespace std;
 
 vector<int> wirthTopoSort(const map<int, vector<int>>& adj) {
@@ -45,7 +45,9 @@ vector<int> wirthTopoSort(const map<int, vector<int>>& adj) {
     }
 
     if (order.size() != nodes.size())
-        return {};
+    {
+        cout << "Есть цикл" << endl;
+    }
 
     return order;
 }
@@ -55,21 +57,39 @@ int main()
 {
     SetConsoleOutputCP(1251);
     cout << "Введите кол-во вершин ";
-    int n, m;
+    int n;
     cin >> n;
-    cout << "Введите кол-во ребер ";
-    cin >> m;
+    /*cout << "Введите кол-во ребер ";
+    cin >> m;*/
 
     map<int, vector<int>> adj;
-    for (int i = 0; i < m; ++i) {
+    for (int i = 1; i <= n; i++)
+    {
+        adj[i] = vector<int>();
+    }
+    int u, v;
+    cout << "Введите ребро ";
+    cin >> u;
+    if (u != 0)
+        cin >> v;
+    while (u != 0 && v != 0)
+    {
+        cout << "Введите ребро ";
+        adj[u].push_back(v);
+        cin >> u;
+        if (u == 0)
+            break;
+        cin >> v;
+    }
+    /*for (int i = 0; i < m; ++i) {
         int u, v;
         cout << "Введите ребро ";
         cin >> u >> v;
         adj[u].push_back(v);
-    }
+    }*/
 
     vector<int> res = wirthTopoSort(adj);
-    if (res.empty() && n > 0)
+    if (res.empty())
         cout << "Цикл\n";
     else
         for (int v : res) cout << v << ' ';
