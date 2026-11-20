@@ -108,7 +108,7 @@ string DetectEncoding(const char* filePath) {
 }
 
 
-int main(char* argv[], int argc)
+int main(int argc, char* argv[])
 {
     SetConsoleOutputCP(1251);
     if (argc < 2) {
@@ -150,11 +150,17 @@ int main(char* argv[], int argc)
             PrintTime(findData.ftLastAccessTime);
             PrintTime(findData.ftLastWriteTime);
             string name = findData.cFileName;
-            if (name.substr(name.find('.'), name.length() - name.find('.')) == ".txt")
-            {
-                string s = argv
-                
-                cout << DetectEncoding(findData.cFileName);
+            string ext;
+            size_t dotPos = name.rfind('.');
+            if (dotPos != string::npos) {
+                ext = name.substr(dotPos);
+                // Приводим к нижнему регистру для сравнения
+                for (char& c : ext) c = static_cast<char>(tolower(static_cast<unsigned char>(c)));
+            }
+            if (ext == ".txt") {
+                // Формируем полный путь
+                string fullPath = dirPath + findData.cFileName;
+                cout << DetectEncoding(fullPath.c_str());
             }
             cout << endl;
         }
